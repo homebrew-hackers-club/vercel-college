@@ -80,7 +80,7 @@ index.html
 ```
 To make sure everything is working, open your HTML file inside your browser of choice. You should see an h1 tag that says, 'Develop. Preview. Ship.'.
 
-HTML vs. the DOM
+### HTML vs. the DOM
 
 If you look at the DOM elements inside your browser developer tools, you will notice the DOM includes the ```<h1>``` element. The DOM of the page is different from the source code - or in other words, the original HTML file you created.
 
@@ -104,7 +104,7 @@ As the size of an app or team grows, it can become increasingly challenging to b
 
 With this approach, developers spend a lot of time writing instructions to tell the computer how it should do things. But wouldn't it be nice to describe what you want to show and let the computer figure out how to update the DOM?
 
-Imperative vs. declarative programming
+### Imperative vs. declarative programming
 
 The code above is a good example of imperative programming. You're writing the steps for how the user interface should be updated. But when it comes to building user interfaces, a declarative approach is often preferred because it can speed up the development process. Instead of having to write DOM methods, it would be helpful if developers were able to declare what they want to show (in this case, an h1 tag with some text).
 
@@ -112,7 +112,7 @@ In other words, imperative programming is like giving a chef step-by-step instru
 
 React is a popular declarative library that you can use build user interfaces.
 
-React: A declarative UI library
+### React: A declarative UI library
 
 As a developer, you can tell React what you want to happen to the user interface, and React will figure out the steps of how to update the DOM on your behalf.
 
