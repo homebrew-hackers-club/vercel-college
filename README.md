@@ -26,7 +26,7 @@ We are running low on food here and we have few weeks before being forced to sel
 
 Got questions? Suggestions? You are [Guillermo Rauch](https://twitter.com/rauchg) thinking wft is this kid doing using my brand? Reach out to us at [contact@homebrew.so](mailto:contact@homebrew.so).
 
-Let's revolutionize the way we learn tech! Together, we can make Vercel College the best place on the Internet for learning React and Next.js. 🌍👩‍💻👨‍💻😻🌈
+Let's revolutionize the way we learn together! 🌍👩‍💻👨‍💻😻🌈
 
 ---
 
