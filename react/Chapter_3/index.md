@@ -1,44 +1,45 @@
-Chapter 3
-Updating UI with Javascript
-10%
-1/10 chapters
-3
-Chapter 3
-Updating UI with Javascript
+# Chapter 3: Updating UI with Javascript
+
 In this chapter, we'll start building out our project by using JavaScript and DOM methods to add an h1 tag to your project.
 
 Open your code editor and create a new index.html file. Inside the HTML file, add the following code:
 
 index.html
 
+```html 
 <html>
   <body>
     <div></div>
   </body>
-</html>
+</html> 
+```
 Then give the div a unique id so that you can target it later.
 
-index.html
 
+```html 
 <html>
   <body>
     <div id="app"></div>
   </body>
 </html>
+```
 To write JavaScript inside your HTML file, add a script tag:
 
-index.html
 
+```html 
 <html>
   <body>
     <div id="app"></div>
     <script type="text/javascript"></script>
   </body>
 </html>
-Now, inside the script tag, you can use a DOM method, getElementById(), to select the <div> element by its id:
+```
+
+Now, inside the script tag, you can use a DOM method, getElementById(), to select the ```<div>``` element by its id:
 
 index.html
 
+```html 
 <html>
   <body>
     <div id="app"></div>
@@ -47,46 +48,49 @@ index.html
     </script>
   </body>
 </html>
-You can continue using DOM methods to create a new <h1> element:
+```
+
+You can continue using DOM methods to create a new ```<h1>``` element:
 
 index.html
 
+```html 
 <html>
   <body>
     <div id="app"></div>
     <script type="text/javascript">
       // Select the div element with 'app' id
       const app = document.getElementById('app');
-
+ 
       // Create a new H1 element
       const header = document.createElement('h1');
-
+ 
       // Create a new text node for the H1 element
       const text = 'Develop. Preview. Ship.';
       const headerContent = document.createTextNode(text);
-
+ 
       // Append the text to the H1 element
       header.appendChild(headerContent);
-
+ 
       // Place the H1 element inside the div
       app.appendChild(header);
     </script>
-
   </body>
 </html>
+```
 To make sure everything is working, open your HTML file inside your browser of choice. You should see an h1 tag that says, 'Develop. Preview. Ship.'.
 
 HTML vs. the DOM
 
-If you look at the DOM elements inside your browser developer tools, you will notice the DOM includes the <h1> element. The DOM of the page is different from the source code - or in other words, the original HTML file you created.
+If you look at the DOM elements inside your browser developer tools, you will notice the DOM includes the ```<h1>``` element. The DOM of the page is different from the source code - or in other words, the original HTML file you created.
 
 Two side-by-side diagrams showing the differences between the rendered DOM elements and Source Code (HTML)
 This is because the HTML represents the initial page content, whereas the DOM represents the updated page content which was changed by the JavaScript code you wrote.
 
-Updating the DOM with plain JavaScript is very powerful but verbose. You've written all this code to add an <h1> element with some text:
+Updating the DOM with plain JavaScript is very powerful but verbose. You've written all this code to add an ```<h1>``` element with some text:
 
 index.html
-
+```html 
 <script type="text/javascript">
   const app = document.getElementById('app');
   const header = document.createElement('h1');
@@ -95,7 +99,7 @@ index.html
   header.appendChild(headerContent);
   app.appendChild(header);
 </script>
-
+```
 As the size of an app or team grows, it can become increasingly challenging to build applications this way.
 
 With this approach, developers spend a lot of time writing instructions to tell the computer how it should do things. But wouldn't it be nice to describe what you want to show and let the computer figure out how to update the DOM?
@@ -127,3 +131,15 @@ Additional Resources:
 
 HTML vs. the DOM
 How declarative UI compares to imperative
+3
+You've Completed Chapter 3
+You've learned how developers use JavaScript to update the UI.
+Next Up
+4: Getting Started with React
+Learn how to add React to your existing project.
+Was this helpful?
+
+
+
+
+

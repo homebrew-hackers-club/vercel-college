@@ -4,11 +4,9 @@
 
 To understand how React works, we first need a basic understanding of how browsers interpret your code to create (or render) user interfaces (UI).
 
-### How Browsers Render UI
-
 When a user visits a web page, the server returns an HTML file to the browser that may look like this:
 
-- **Diagrams**: Two side-by-side diagrams, left showing the HTML code, and right showing the DOM tree.
+![Learn HTML and Dom](learn-html-and-dom.webp)
 
 The browser then reads the HTML and constructs the Document Object Model (DOM).
 
@@ -16,19 +14,20 @@ The browser then reads the HTML and constructs the Document Object Model (DOM).
 
 The DOM is an object representation of the HTML elements. It acts as a bridge between your code and the user interface, and has a tree-like structure with parent and child relationships.
 
-- **Diagrams**: Two side-by-side diagrams, left showing the DOM tree, and right showing the rendered UI.
+![Two side-by-side diagrams, left showing the DOM tree, and right showing the rendered UI.](learn-dom-and-ui.webp)
 
-You can use DOM methods and JavaScript, to listen to user events and manipulate the DOM by selecting, adding, updating, and deleting specific elements in the user interface. DOM manipulation allows you to not only target specific elements but also change their style and content.
 
-### Learning JavaScript and DOM Methods
+You can use DOM methods and JavaScript, to listen to user events and [manipulate the DOM](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Manipulating_documents) by selecting, adding, updating, and deleting specific elements in the user interface. DOM manipulation allows you to not only target specific elements, but also change their style and content.
 
-In the next section, you'll learn how to use JavaScript and DOM methods.
+In the next section you'll learn how to use JavaScript and DOM methods.
+
+
 
 ## Additional Resources
 
-- [Introduction to the DOM](#)
-- [How to view the DOM in Google Chrome](#)
-- [How to view the DOM in Firefox](#)
+- [Introduction to the DOM](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction)
+- [How to view the DOM in Google Chrome](https://developer.chrome.com/docs/devtools/dom/)
+- [How to view the DOM in Firefox](https://firefox-source-docs.mozilla.org/devtools-user/debugger/how_to/highlight_and_inspect_dom_nodes/index.html)
 
 ## Quiz Time
 
