@@ -84,7 +84,7 @@ HTML vs. the DOM
 
 If you look at the DOM elements inside your browser developer tools, you will notice the DOM includes the ```<h1>``` element. The DOM of the page is different from the source code - or in other words, the original HTML file you created.
 
-Two side-by-side diagrams showing the differences between the rendered DOM elements and Source Code (HTML)
+![Two side-by-side diagrams showing the differences between the rendered DOM elements and Source Code (HTML)](learn-dom-and-source.webp)
 This is because the HTML represents the initial page content, whereas the DOM represents the updated page content which was changed by the JavaScript code you wrote.
 
 Updating the DOM with plain JavaScript is very powerful but verbose. You've written all this code to add an ```<h1>``` element with some text:
