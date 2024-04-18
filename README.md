@@ -20,7 +20,7 @@ To get started with Vercel College, follow these steps:
 
 ## Support 🤑
 
-We are running low on food here and we have few weeks before being forced to sell our souls to facebook and optimalize adds for the rest ouf our lifes instead of hacking cool things so if you want to be our cyberdaddy go to my [onlyfans]("https://www.youtube.com/watch?v=PXqcHi2fkXI")
+We are running low on food here and we have few weeks before being forced to sell our souls to facebook and optimalize adds for the rest ouf our lifes instead of hacking cool things so if you want to be our cyberdaddy go to my [onlyfans](https://www.youtube.com/watch?v=PXqcHi2fkXI)
 
 ## Contact Us 📬
 
