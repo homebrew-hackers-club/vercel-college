@@ -1,0 +1,30 @@
+---
+title: Fine-tuning GPT with OpenAI, Next.js, and Vercel AI SDK
+description: In this guide, we will build Shooketh – an AI bot fine-tuned on Shakespeare's literary works with OpenAI GPT-4o and the Vercel AI SDK.
+tags:
+  - gpt
+  - vercel
+  - fine-tuning
+---
+
+## Introduction
+
+OpenAI offers fine-tuning for GPT-4o and GPT-4o mini, enabling developers to customize these models for specific use cases. Fine-tuning adapts the model to perform efficiently on desired tasks by training it on a tailored dataset.
+
+## Prompt Engineering
+
+Prompt engineering provides direction to `gpt-4o` through prompts. However, it has limitations:
+1. **Latency**: Larger prompts lead to slower responses, affecting real-time applications.
+2. **Quality**: Output may vary depending on the prompt, potentially reducing coherence.
+
+## Fine-tuning Overview
+
+Fine-tuning customizes the model in advance for a specific use case, similar to caching data in Next.js (`getStaticProps` vs. `getServerSideProps`), making it more efficient and cost-effective.
+
+## Steps for Fine-tuning
+
+1. **Prepare your dataset**: Create conversation examples formatted in JSONL for OpenAI's Chat completions API.
+2. **Upload and fine-tune**: Use OpenAI's API to process the data and initiate the fine-tuning job.
+3. **Deploy and monitor**: Clone the Shooketh template on GitHub to use as a starting point.
+
+For a complete example, clone [Shooketh's repository](https://github.com/vercel-labs/shooketh).
