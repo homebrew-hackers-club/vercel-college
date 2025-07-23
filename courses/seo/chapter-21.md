@@ -47,11 +47,3 @@ Core Web Vitals help to strive for the best page experience. According to a stud
 #### Further Reading
 
 - Chromium: The Science Behind Web Vitals
-
-### You've Completed Chapter 21
-
-Next Up
-
-22: Improving your Core Web Vitals
-
-Was this helpful?

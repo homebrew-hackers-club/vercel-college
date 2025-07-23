@@ -26,11 +26,3 @@ As the DOM is rendered, the largest element on the page may change. The Largest 
 
 - Google: Largest Contentful Paint Documentation
 - Vercel: Blog: Core Web Vitals - Largest Contentful Paint
-
-### You've Completed Chapter 18
-
-Next Up
-
-19: First Input Delay (FID)
-
-Was this helpful?

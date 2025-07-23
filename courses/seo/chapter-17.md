@@ -28,11 +28,3 @@ You can approach Core Web Vitals in two different ways:
 
 In the following lessons, we will go through each vital to understand what it
 measures.
-
-### You've Completed Chapter 17
-
-Next Up
-
-18: Largest Contentful Paint (LCP)
-
-Was this helpful?

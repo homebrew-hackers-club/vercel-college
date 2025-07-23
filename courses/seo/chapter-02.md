@@ -5,9 +5,6 @@ order: 2
 
 # Search Systems
 
-2
-
-Chapter 2
 
 Search Systems are what you typically refer to as Search Engines (Google, Bing, DuckDuckGo, etc.). They are massively complex systems that tackle some of the biggest challenges in technology history.
 
@@ -19,11 +16,3 @@ Search Systems have four main responsibilities:
 - Ranking: querying data to craft relevant results pages based on user input. This is where the different ranking criteria are applied in Search engines to give users the best answer to fulfill their intent.
 
 In the next section, we will learn more specifically how Googlebot works. Googlebot is Google's internet crawler, the part of the search system that gathers all the information needed to create the massive database of content to serve search results.
-
-### You've Completed Chapter 2
-
-Next Up
-
-3: What are Web Crawlers?
-
-Was this helpful?

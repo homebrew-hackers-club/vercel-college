@@ -1,16 +1,13 @@
 ---
 title: Chapter 14
-
-![Example of a SERP snippet with a title and description](./assets/example-of-a-serp-snippet-with-a-title-and-descrip-light.jpg)
-
 order: 14
 ---
 
 # Metadata
 
-14
 
-Chapter 14
+![Example of a SERP snippet with a title and description](./assets/example-of-a-serp-snippet-with-a-title-and-descrip-light.jpg)
+
 
 Metadata is the abstract of the website's content and is used to attach a title, a description, and an image to the site.
 
@@ -220,11 +217,3 @@ In this example, the data is hardcoded as a string, but you can easily pass the 
 - Google: Intro to Structured Data
 - Google: Product Structured Data
 - Google: Rich Results Tester
-
-### You've Completed Chapter 14
-
-Next Up
-
-15: On Page SEO
-
-Was this helpful?

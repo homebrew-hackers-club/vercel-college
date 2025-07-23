@@ -5,9 +5,6 @@ order: 31
 
 # Custom Reporting
 
-31
-
-Chapter 31
 
 It is also possible to use the built-in relayer Next.js Speed Insights uses and send the data to your own service or push them to Google Analytics.
 
@@ -44,11 +41,3 @@ interact with the page.
 #### Further Reading
 
 - Next.js: Measuring Performance
-
-### You've Completed Chapter 31
-
-Next Up
-
-32: Other Tools
-
-Was this helpful?

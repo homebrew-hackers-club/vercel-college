@@ -5,9 +5,6 @@ order: 1
 
 # Why is SEO so important?
 
-1
-
-Chapter 1
 
 SEO is the key to increased conversion and confidence in your brand. Higher search ranking placement equates to more organic visitors.
 
@@ -30,11 +27,3 @@ The process of optimizing a website can be divided into three main pillars:
 - Popularity: Boost your site's presence online so search engines know you are a trusted source. This is done through the use of backlinks, third-party sites that link back to your site.
 
 The SEO discipline is broad and has many facets, but as a Next.js developer, the first step is to understand how you can make your web app SEO-ready with some best practices.
-
-### You've Completed Chapter 1
-
-Next Up
-
-2: Search Systems
-
-Was this helpful?

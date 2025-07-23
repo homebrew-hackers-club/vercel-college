@@ -8,10 +8,6 @@ order: 3
 ![Googlebot flow chart](./assets/googlebot-flow-chart-light.jpg)
 
 
-3
-
-Chapter 3
-
 In order for your website to appear in search results, Google (as well as other search engines such as Bing, Yandex, Baidu, Naver, Yahoo or DuckDuckGo) use web crawlers to navigate the website to discover websites and its web pages.
 
 Different search engines have different market shares in each country.
@@ -42,11 +38,3 @@ In the next few sections, we will take a deep dive into each of the main compone
 
 - Google: SEO Starter Guide
 - MDN: MDN: User-Agents
-
-### You've Completed Chapter 3
-
-Next Up
-
-4: Crawling and Indexing
-
-Was this helpful?

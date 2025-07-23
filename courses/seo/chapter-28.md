@@ -5,9 +5,6 @@ order: 28
 
 # Optimizing Third-Party Scripts
 
-28
-
-Chapter 28
 
 Many applications rely on third-party JavaScript to include different types of functionality, such as analytics, ads, and customer support widgets. However,
 embedding third-party authored code can delay page content from rendering and affect user performance if it is loaded too early.
@@ -57,11 +54,3 @@ loading, either immediately after the page becomes interactive (strategy="afterI
 
 - Next.js: Script Component
 - Next.js: API Reference for next/script
-
-### You've Completed Chapter 28
-
-Next Up
-
-29: Monitoring your Core Web Vitals
-
-Was this helpful?

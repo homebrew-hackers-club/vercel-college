@@ -5,9 +5,6 @@ order: 15
 
 # On Page SEO
 
-15
-
-Chapter 15
 
 At a high level, on page SEO refers to the headings and links that make up the overall structure of the page. Headings indicate importance in the document and links connect the web together.
 
@@ -87,11 +84,3 @@ If you use ESLint, Next.js has a rule to protect against this happening.
 
 - Next.js: Link
 - Next.js: eslint-plugin-next
-
-### You've Completed Chapter 15
-
-Next Up
-
-16: Web Performance & Core Web Vitals
-
-Was this helpful?

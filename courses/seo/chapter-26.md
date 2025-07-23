@@ -5,9 +5,6 @@ order: 26
 
 # Dynamic Imports for Components
 
-26
-
-Chapter 26
 
 Next, let's turn our attention to a React component that is not needed on the initial page load.
 
@@ -66,11 +63,3 @@ We are left with this two optimization suggestions:
 #### Further Reading
 
 - Next.js: Dynamic Imports Documentation
-
-### You've Completed Chapter 26
-
-Next Up
-
-27: Optimizing Fonts
-
-Was this helpful?

@@ -5,9 +5,6 @@ order: 7
 
 # XML Sitemaps
 
-7
-
-Chapter 7
 
 Sitemaps are the easiest way to communicate with Google. They indicate the URLs that belong to your website and when they update so that Google can easily detect new content and crawl your website more efficiently.
 
@@ -108,11 +105,3 @@ export default SiteMap;
 
 - Google: Learn about Sitemaps
 - Google: Overview of crawling and indexing topics
-
-### You've Completed Chapter 7
-
-Next Up
-
-8: Special Meta Tags for Search Engines
-
-Was this helpful?

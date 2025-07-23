@@ -5,9 +5,6 @@ order: 32
 
 # Other Tools
 
-32
-
-Chapter 32
 
 You can find field data collection in the following tools:
 
@@ -21,11 +18,3 @@ If you are looking for lab data, Google also offers several measurement tools:
 - Chrome DevTools: Set of web developer tools built directly into the Google Chrome browser.
 
 Note that for both tools, you will need to use Total Blocking Time (TBT) as an alternative to First Input Delay (FID) since FID can only be measured through field data.
-
-### You've Completed Chapter 32
-
-Next Up
-
-33: Data Studio (Chrome User Experience Report)
-
-Was this helpful?

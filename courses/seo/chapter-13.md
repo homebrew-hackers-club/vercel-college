@@ -5,9 +5,6 @@ order: 13
 
 # URL Structure
 
-13
-
-Chapter 13
 
 URL Structure is an important part of an SEO strategy. While Google doesn't disclose which weight each part of SEO has, great URLs are considered a best practice no matter if they are a big or small ranking factor in the end.
 
@@ -126,11 +123,3 @@ export default BlogPost;
 - Next.js: Introduction to Routing
 - Next.js: Pages
 - Next.js: Dynamic Routing
-
-### You've Completed Chapter 13
-
-Next Up
-
-14: Metadata
-
-Was this helpful?

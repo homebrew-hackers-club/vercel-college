@@ -5,9 +5,6 @@ order: 11
 
 # Rendering Strategies
 
-11
-
-Chapter 11
 
 #### Static Site Generation (SSG)
 
@@ -44,11 +41,3 @@ statically generated, your customers account dashboard client side rendered and 
 - Next.js: Data Fetching
 - Smashing Magazine: A Complete Guide to Incremental Static Regeneration with Next.js
 - Vercel: Next.js: Server-side Rendering vs. Static Generation
-
-### You've Completed Chapter 11
-
-Next Up
-
-12: What about AMP?
-
-Was this helpful?

@@ -5,9 +5,6 @@ order: 6
 
 # What is a robots.txt File?
 
-6
-
-Chapter 6
 
 A robots.txt file tells search engine crawlers which pages or files the crawler can or can't
 request from your site. The robots.txt file is a web standard file that most good bots consume before requesting anything from a specific domain.
@@ -37,11 +34,3 @@ Do not name the public directory anything else. The name cannot be changed and i
 #### Further Reading
 
 - Google: Create and Submit a robots.txt File
-
-### You've Completed Chapter 6
-
-Next Up
-
-7: XML Sitemaps
-
-Was this helpful?

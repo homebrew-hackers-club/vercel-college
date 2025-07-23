@@ -26,11 +26,3 @@ FID requires real user data and cannot be measured in the lab (e.g. Google Light
 
 - Google: First Input Delay Documentation
 - Vercel: Blog: Core Web Vitals - First Input Delay
-
-### You've Completed Chapter 19
-
-Next Up
-
-20: Cumulative Layout Shift (CLS)
-
-Was this helpful?

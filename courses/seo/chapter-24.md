@@ -5,9 +5,6 @@ order: 24
 
 # Automatic Image Optimization
 
-24
-
-Chapter 24
 
 #### Unoptimized Images
 
@@ -89,11 +86,3 @@ Finally, run another Lighthouse report in Chrome DevTools and compare your resul
 
 - Next.js: Automatic Image Optimization Documentation
 - Next.js: API Reference for next/image
-
-### You've Completed Chapter 24
-
-Next Up
-
-25: Dynamic Imports
-
-Was this helpful?

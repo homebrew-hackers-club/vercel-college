@@ -5,9 +5,6 @@ order: 25
 
 # Dynamic Imports
 
-25
-
-Chapter 25
 
 In this lesson, we will reduce the amount of JavaScript loaded during initial page load from third-party libraries.
 
@@ -71,11 +68,3 @@ Let's run another Lighthouse Report in Chrome DevTools to view our progress.
 #### Further Reading
 
 - Next.js: Dynamic Imports Documentation
-
-### You've Completed Chapter 25
-
-Next Up
-
-26: Dynamic Imports for Components
-
-Was this helpful?

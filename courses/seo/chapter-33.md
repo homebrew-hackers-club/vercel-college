@@ -5,9 +5,6 @@ order: 33
 
 # Data Studio (Chrome User Experience Report)
 
-33
-
-Chapter 33
 
 Another great free and open-source way of measuring your performance is to use the Chrome User Experience Report dataset.
 
@@ -27,11 +24,3 @@ Also, the data is updated on a monthly basis. Usually around 15 days after the m
 #### Further Reading
 
 - Google: Example Dashboard (copy for free)
-
-### You've Completed Chapter 33
-
-Next Up
-
-34: Next Steps
-
-Was this helpful?

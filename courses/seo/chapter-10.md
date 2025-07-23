@@ -5,9 +5,6 @@ order: 10
 
 # Rendering and Ranking
 
-10
-
-Chapter 10
 
 JavaScript is an important part of the web development ecosystem. In the past, most programming languages were sending all content directly from the server.
 
@@ -24,11 +21,3 @@ Rendering (SSR).
 results page ranking.
 
 Let's dive in!
-
-### You've Completed Chapter 10
-
-Next Up
-
-11: Rendering Strategies
-
-Was this helpful?

@@ -5,9 +5,6 @@ order: 16
 
 # Web Performance & Core Web Vitals
 
-16
-
-Chapter 16
 
 Web Vitals is an initiative created by Google to provide unified guidance and metrics to measure end-user page experience
 on the web.
@@ -24,11 +21,3 @@ In this lesson, you’ll learn:
 - Implications of Core Web Vitals in SEO and UX, and its impact on your website.
 - Why you should care about Core Web Vitals in your development process and how to measure them.
 - How to improve your Core Web Vitals with Next.js and monitor changes.
-
-### You've Completed Chapter 16
-
-Next Up
-
-17: Web Vitals Overview
-
-Was this helpful?

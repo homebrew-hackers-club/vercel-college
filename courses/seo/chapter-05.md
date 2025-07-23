@@ -5,9 +5,6 @@ order: 5
 
 # What are HTTP Status Codes?
 
-5
-
-Chapter 5
 
 HTTP response status codes indicate whether a specific HTTP request has been successfully completed.
 There are many status codes, but only a handful are meaningful in an SEO context.
@@ -138,11 +135,3 @@ export default function Custom500() {
 The HTTP 503 Service Unavailable server error response code indicates that the server is not ready to handle the request.
 
 It's recommended to return this status code when your website is down and you predict that the website will be down by an extended period of time. This prevents losing rankings on a long-term basis.
-
-### You've Completed Chapter 5
-
-Next Up
-
-6: What is a robots.txt File?
-
-Was this helpful?

@@ -28,11 +28,3 @@ existing element changes size, it doesn’t count toward layout shift if the loa
 
 - Google: Cumulative Layout Shift Documentation
 - Vercel: Blog: Core Web Vitals - Cumulative Layout Shift
-
-### You've Completed Chapter 20
-
-Next Up
-
-21: SEO Impact
-
-Was this helpful?

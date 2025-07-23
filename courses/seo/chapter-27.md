@@ -5,9 +5,6 @@ order: 27
 
 # Optimizing Fonts
 
-27
-
-Chapter 27
 
 82% of web pages for desktop use web fonts. Custom fonts are important for the branding, design, and cross-browser/device consistency of your site. However, using a web font should not come at the cost of performance.
 
@@ -28,11 +25,3 @@ After optimizing, Next.js inlines the font CSS for you:
   @font-face{font-family:'Inter';font-style:normal; }
 </style>
 ```
-
-### You've Completed Chapter 27
-
-Next Up
-
-28: Optimizing Third-Party Scripts
-
-Was this helpful?

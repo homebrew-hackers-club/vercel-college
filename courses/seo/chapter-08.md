@@ -5,9 +5,6 @@ order: 8
 
 # Special Meta Tags for Search Engines
 
-8
-
-Chapter 8
 
 Meta robot tags are directives that search engines will always respect. Adding these robots tags can make the indexation of your website easier.
 
@@ -107,11 +104,3 @@ export default IndexPage;
 ```
 
 As you can see in the example, we are using next/head which is a built-in component for appending elements to the head of a page. To avoid duplicate tags in your head you can use the key property, which will make sure the tag is only rendered once.
-
-### You've Completed Chapter 8
-
-Next Up
-
-9: What are Canonical Tags?
-
-Was this helpful?

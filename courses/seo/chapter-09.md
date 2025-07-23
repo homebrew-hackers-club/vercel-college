@@ -5,9 +5,6 @@ order: 9
 
 # What are Canonical Tags?
 
-9
-
-Chapter 9
 
 A canonical URL is the URL of the page that search engines think is most representative from a set of duplicate pages on your site.
 
@@ -65,11 +62,3 @@ export default IndexPage;
 
 - Google: Consolidate Duplicate URLs
 - Next.js: i18n Routing
-
-### You've Completed Chapter 9
-
-Next Up
-
-10: Rendering and Ranking
-
-Was this helpful?

@@ -5,9 +5,6 @@ order: 23
 
 # Introducing Lighthouse
 
-23
-
-Chapter 23
 
 As we saw in the previous section, Core Web Vitals focus on aspects of the user experience via loading performance (Largest Contentful Paint), interactivity (First Input Delay), and visual stability (Cumulative Layout Shift).
 
@@ -76,11 +73,3 @@ Let's run a Lighthouse report with Chrome DevTools. Once the report has complete
 #### Further Reading
 
 - Google Chrome: Lighthouse Scoring Calculator
-
-### You've Completed Chapter 23
-
-Next Up
-
-24: Automatic Image Optimization
-
-Was this helpful?
