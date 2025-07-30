@@ -1,6 +1,6 @@
 ---
 title: Next Steps
-order: 999
+order: 34
 ---
 
 # Next Steps
