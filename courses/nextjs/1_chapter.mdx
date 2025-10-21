@@ -6,20 +6,15 @@ order: 1
 ## Creating a new project
 
 To create a Next.js app, open your terminal,
-[`cd`](https://developer.mozilla.org/en-
-US/docs/Learn/Tools_and_testing/Understanding_client-
-side_tools/Command_line#basic_built-in_terminal_commands) into the folder
-you'd like to keep your project, and run the following command:
+[`cd`](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Command_line#basic_built-in_terminal_commands) into the folder you'd like to keep your project, and run the following command:
 
-Terminal
+```bash
+npx create-next-app@latest nextjs-dashboard --use-npm --example "https://github.com/vercel/next-learn/tree/main/dashboard/starter-example"
+```
 
-    npx create-next-app@latest nextjs-dashboard --use-npm --example "https://github.com/vercel/next-learn/tree/main/dashboard/starter-example"
-
-This command uses [`create-next-app`](/docs/app/api-reference/create-next-
-app), a Command Line Interface (CLI) tool that sets up a Next.js application
+This command uses [`create-next-app`](/docs/app/api-reference/create-next-app), a Command Line Interface (CLI) tool that sets up a Next.js application
 for you. In the command above, you're also using the `--example` flag with the
-[starter example](https://github.com/vercel/next-
-learn/tree/main/dashboard/starter-example) for this course.
+[starter example](https://github.com/vercel/next-learn/tree/main/dashboard/starter-example) for this course.
 
 ## Exploring the project
 
@@ -33,9 +28,9 @@ without having to write _all_ the application code.
 After installation, open the project in your code editor and navigate to
 `nextjs-dashboard`.
 
-Terminal
-
-    cd nextjs-dashboard
+```bash
+cd nextjs-dashboard
+```
 
 Let's spend some time exploring the project.
 
@@ -43,13 +38,7 @@ Let's spend some time exploring the project.
 
 You'll notice that the project has the following folder structure:
 
-![Folder structure of the dashboard project, showing the main folders and
-files: app, public, and config
-files.](/\_next/image?url=%2Flearn%2Flight%2Flearn-folder-
-structure.png&w=3840&q=75)![Folder structure of the dashboard project, showing
-the main folders and files: app, public, and config
-files.](/\_next/image?url=%2Flearn%2Fdark%2Flearn-folder-
-structure.png&w=3840&q=75)
+![Folder structure of the dashboard project, showing the main folders and files: app, public, and config files.](/assets/next-folder-structure.png)
 
 - **`/app`** : Contains all the routes, components, and logic for your application, this is where you'll be mostly working from.
 - **`/app/lib`** : Contains functions used in your application, such as reusable utility functions and data fetching functions.
@@ -93,8 +82,7 @@ table in your database. For example, for the invoices table:
     ];
 ```
 
-In the chapter on [setting up your database](/learn/dashboard-app/setting-up-
-your-database), you'll use this data to _seed_ your database (populate it with
+In the chapter on [setting up your database](/learn/dashboard-app/setting-up-your-database), you'll use this data to _seed_ your database (populate it with
 some initial data).
 
 ### TypeScript
@@ -135,26 +123,21 @@ format to your components or database, like passing a `string` instead of a
 >   types based on your database schema.
 > - Next.js detects if your project uses TypeScript and automatically
 >   installs the necessary packages and configuration. Next.js also comes with a
->   [TypeScript plugin](https://nextjs.org/docs/app/building-your-
->   application/configuring/typescript#typescript-plugin) for your code editor,
+>   [TypeScript plugin](https://nextjs.org/docs/app/building-your-application/configuring/typescript#typescript-plugin) for your code editor,
 >   to help with auto-completion and type-safety.
 
 ## Running the development server
 
 Run `npm i` to install the project's packages.
 
-```shel
-Terminal
-
-    npm i
+```bash
+npm i
 ```
 
 Followed by `npm run dev` to start the development server.
 
-```shel
-Terminal
-
-    npm run dev
+```bash
+npm run dev
 ```
 
 `npm run dev` starts your Next.js development server on port `3000`. Let's
@@ -162,26 +145,4 @@ check to see if it's working. Open
 [http://localhost:3000](http://localhost:3000/) on your browser. Your home
 page should look like this:
 
-![Unstyled page with the title 'Acme', a description, and login
-link.](/\_next/image?url=%2Flearn%2Flight%2Facme-
-unstyled.png&w=3840&q=75)![Unstyled page with the title 'Acme', a description,
-and login link.](/\_next/image?url=%2Flearn%2Fdark%2Facme-
-unstyled.png&w=3840&q=75)
-
-1
-
-## You've Completed Chapter 1
-
-Congratulations! You've created a Next.js application using the starter
-example and ran the development server.
-
-Next Up
-
-2: CSS Styling
-
-Let's work on your home page and discuss the different ways you can style your
-application.
-
-[Start Chapter 2](/learn/dashboard-app/css-styling)
-
-Was this helpful?
+![Unstyled page with the title 'Acme', a description, and login link.](/assets/next-acme-unstyled.png)
