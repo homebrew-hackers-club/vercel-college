@@ -1,0 +1,169 @@
+---
+title: Data Extraction
+---
+
+Now that you've learned some theory and got your project setup, it's time to ship some code. You will build and run a script that extracts info from text using the AI SDK's `generateText` method. This will show you firsthand how tweaking your prompt or swapping models instantly changes your results.
+
+## How Your Script Works
+
+![How script works](/assets/aisdk-howscriptwork.png)
+
+## Analyzing the Starter Script
+
+Open your project code. Look for `app/(1-extraction)/extraction.ts` and `essay.txt`.
+
+Update the contents of `extraction.ts` with this code that extracts names from the essay:
+
+```typescript
+app/(1-extraction)/extraction.ts
+
+import dotenvFlow from 'dotenv-flow';
+dotenvFlow.config(); // Load environment variables (API keys, etc.)
+import fs from 'fs';
+import { generateText } from 'ai'; // AI SDK's core text generation function
+
+// Read the essay file that we'll extract names from
+const essay = fs.readFileSync('app/(1-extraction)/essay.txt', 'utf-8');
+
+async function main() {
+  // Call the LLM with our extraction prompt
+  const result = await generateText({
+    model: 'openai/gpt-4.1', // Fast, cost-effective for simple extraction tasks (non-reasoning)
+                              // For complex analysis, try 'openai/gpt-5' (reasoning model, slower but more accurate)
+    prompt: `Extract all the names mentioned in this essay. List them separated by commas.
+Essay:
+${essay}`, // Instruction + the actual essay content
+  });
+  
+  // The AI's response is in result.text
+  console.log('\n--- AI Response ---');
+  console.log(result.text); // This will be something like: "John Smith, Jane Doe, ..."
+  console.log('-------------------');
+}
+
+// Run the async function and catch any errors
+main().catch((error) => {
+  console.error('❌ Extraction failed:', error.message);
+  console.log('\n💡 Common issues:');
+  console.log('  - Check your .env.local file has valid API keys');
+  console.log('  - Verify essay.txt exists at app/(1-extraction)/essay.txt');
+  console.log('  - Ensure you have internet connectivity for API calls');
+  process.exit(1);
+});
+```
+
+## Run Your First AI Script!
+
+From your terminal, run:
+
+```bash
+pnpm extraction
+```
+
+You'll see the AI extracting names from the essay. Your first feature works. Nice!
+
+```
+--- AI Response ---
+Here are all the names mentioned in the essay, separated by commas:
+
+Brian Chesky, Ron Conway, Steve Jobs, John Sculley
+-------------------
+```
+
+> Verification Task
+> * Check `app/(1-extraction)/essay.txt` and use search (Cmd+F/Ctrl+F) to verify the names. Did the AI nail it or miss some?
+
+> LLMs process text as 'tokens' (~4 chars each). Understanding tokens helps optimize speed and cost:
+> *   **Visualize tokenization** at [tiktokenizer.vercel.app](https://tiktokenizer.vercel.app/)
+> *   **Count tokens programmatically** with `tiktoken`: `pnpm add tiktoken`
+> *   **Monitor usage** to estimate costs and stay within context limits
+> * Try pasting different prompts into Tiktokenizer to see surprising patterns (spaces matter!).
+
+## Iteration is Everything
+
+Running the script once is just the start. Working with LLMs is all about iteration. Play with the prompt and see for yourself:
+
+### Challenge 1: Prompt Engineering – Change the Task
+
+*   **Task:** Swap the prompt to the following:
+
+```
+// Inside the prompt backticks:
+What is the key takeaway of this piece in 50 words?
+
+Essay:
+${essay}
+```
+
+*   **Action:** Save and re-run `pnpm extraction`
+*   **Observe:** See how one prompt change completely transforms what your app does
+
+### Challenge 2: Model Swapping – Upgrade the Brain
+
+*   **Task:** Keep the summary prompt but change the model using the following code block:
+
+```
+// Change this line:
+model: 'openai/gpt-5',
+```
+
+*   **Action:** Save and run again
+*   **Observe:** Compare results. Better quality? Worth the extra cost/time?
+
+> **Available OpenAI Models via Vercel AI Gateway:**
+> *   `openai/gpt-5` - Most capable for complex reasoning
+> *   `openai/gpt-4.1` - Fast & cost-effective for most tasks (non-reasoning)
+> *   `openai/gpt-5-nano` - Fastest for simple tasks
+> *   `openai/gpt-4.1-mini` - Previous generation, still capable (non-reasoning)
+
+> **Available Anthropic Models via Vercel AI Gateway:**
+> *   `anthropic/claude-sonnet-4` - Strong reasoning & analysis
+
+> **Available Google Models via Vercel AI Gateway:**
+> *   `google/gemini-2.5-pro` - Advanced multimodal capabilities
+> *   `google/gemini-2.5-flash` - Fast responses, good balance
+> *   `google/gemini-2.5-flash-lite` - Lightweight & quick
+> *   `google/gemini-2.0-flash` - Previous flash version
+
+> See the [Vercel AI Gateway models](https://vercel.com/ai-gateway/models) for pricing & details, or the [OpenAI models documentation](https://platform.openai.com/docs/models) for OpenAI-specific info.
+
+> Simply swap the model string to experiment - the AI SDK handles all the provider differences for you!
+
+## Real-World Applications
+
+This simple extraction pattern powers serious production features like:
+
+*   **Content Moderation:** Finding problematic content
+*   **Research Tools:** Pulling key data from papers
+*   **Data Pipelines:** Converting messy text to clean data
+*   **Compliance Systems:** Identifying PII/sensitive info
+
+It's the same pattern: send content + instructions, process the response.
+
+## Key things to remember
+
+*   `generateText` = your basic AI workhorse
+*   The `prompt` = what guides the AI
+*   The `model` = power/speed/cost tradeoff
+*   **Iteration** = the key to success
+
+**Troubleshooting Guide**
+
+* **API Key Errors (401):** Check your .env.local file. Key spelled right? Pasted fully? Account has credits?
+* **Rate Limiting (429):** Hit usage limits. Wait a bit or upgrade your plan.
+* **Module Errors:** Run pnpm install again. Maybe clear node_modules first.
+* **Timeouts:** Larger models are slower. Normal. Check internet if consistent fails.
+* **Command not found:** Make sure pnpm is installed globally and run pnpm install in project root.
+
+## Further Reading (Optional)
+
+*   [**AI SDK Documentation**](https://ai-sdk.dev/docs/ai-sdk-core/generating-text): Official documentation for the core function we used in this lesson. Explore all parameters and options available.
+*   [**Tiktokenizer**](https://tiktokenizer.vercel.app/): Interactive tokenization visualizer built with Next.js. See exactly how your text breaks down into tokens across different models. ([Open source on GitHub](https://github.com/dqbd/tiktokenizer))
+*   [**Prompt Engineering Guide**](https://www.promptingguide.ai/): Explore advanced prompting techniques to further improve your AI interactions beyond the basics covered in this lesson.
+*   [**Vercel AI Gateway Model Library**](https://ai-sdk.dev/model-library): Understand the capabilities, strengths, cost, and trade-offs of different models to make informed choices for your applications.
+
+## What's Next: Model Types and Performance
+
+You've built your first AI script and experienced the power of prompt engineering. In the next lesson, you'll learn about different model types and their performance characteristics. Understanding when to use fast models vs reasoning models is crucial for building AI features that deliver the right user experience.
+
+After that, you'll be ready for "invisible AI" - behind-the-scenes features that enhance your product's UX using the patterns you've learned here.

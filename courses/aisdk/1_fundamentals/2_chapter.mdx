@@ -1,0 +1,278 @@
+---
+title: Prompting Fundamentals
+---
+
+Now that you've got a basic understanding of LLMs and how they serve as an API we can dive into the secret sauce - how to actually speak the language of these models to get the results that you want.
+
+You do this using prompts.
+
+Prompts are the text input that you send to the LLM. Prompting can be powerful, but requires effective techniques to get consistent results. An LLM will respond to any prompt, but all prompts are not created equally.
+
+Good prompts can turn an LLM from novelty into a reliable coworker.
+
+Think of prompting a model like a chef preparing a meal. Bad ingredients will result in a bad meal.
+
+Same with AI: bad prompt = bad output, no matter how fancy your code wrapper.
+
+A good prompt is crucial. It's what gets the AI to consistently do what you want.
+
+
+> 🔄 The Golden Rule of Prompting
+> * Iterate aggressively. Monitor outputs. Keep tweaking.
+
+Before diving into techniques, understand the basic anatomy of a good prompt:
+
+> Basic Prompt Structure (ICOD). Good prompts typically contain:
+> *   **I**nstruction: What task to do
+> *   **C**ontext: Background info
+> *   **O**utput Indicator: Format requirements (critical for `generateObject`)
+> *   **D**ata: The actual input
+
+## 3 Techniques for Prompt Engineering
+
+Let's dive into three core techniques every builder needs to know:
+
+1.  **Zero-Shot**: Just ask directly without examples
+2.  **Few-Shot**: Provide examples to guide the output format
+3.  **Chain-of-Thought**: Break complex problems into steps
+
+![Zero shot image](/assets/aisdk-zeroshot.png)
+
+### Zero-Shot Prompting: Just Ask!
+
+This is the simplest and most common form of prompting: simply asking the model to do something directly, without providing examples.
+
+*   **Example (Conceptual):**
+    *   Prompt: `Classify the sentiment (positive/negative/neutral): 'This movie was okay.'`
+    *   Expected Output: `Neutral`
+*   **AI SDK Context:** Great for simple `generateText` calls where the task is common (like basic summarization, Q&A). Relies heavily on the model's pre-trained knowledge.
+
+```javascript
+// Simple classification with generateText
+const { text } = await generateText({
+  model: 'openai/gpt-4.1',
+  prompt: `Classify sentiment (positive/negative/neutral): '${userInput}'`,
+});
+// Output might be "Neutral", "neutral", "The sentiment is neutral.", etc.
+```
+
+This approach is great for quick for straightforward tasks, but less reliable for complex instructions or specific output formats.
+
+<Woz title="Zero-Shot Example" description="See how the AI classifies sentiment without examples" prompt="Classify the sentiment (positive/negative/neutral): 'This movie was okay.'"/>
+
+### Few-Shot Prompting: Show, Don't Just Tell
+
+For more complex tasks or specific output formats, you need to provide examples _within the prompt_ to show the model the pattern or format you want it to follow.
+
+#### Example (Fictional Word):
+
+```
+Word Definition: Farduddle - To randomly dance vigorously.
+Word Example: After hearing the news, he started to farduddle uncontrollably.
+
+Word Definition: Vardudel - To procrastinate by organizing pencils.
+Word Example:
+```
+
+The model sees the pattern (definition → example) and completes it. This structured approach uses our ICOD framework:
+
+ICOD Breakdown for Few-Shot Example
+
+*   Instruction: Implied - complete the pattern for the new word
+*   Context: The examples showing definition-to-example pattern
+*   Output Indicator: Format shown in examples (Word Example: ...)
+*   Data: The new word "Vardudel" and its definition
+
+```javascript
+// Guiding generateText with a few-shot example
+const { text } = await generateText({
+  model: 'openai/gpt-4.1',
+  prompt: `
+    Classify the following items based on the examples.
+
+    Item: Apple
+    Category: A
+    Reason: It's a fruit.
+
+    Item: ${userItem}
+    Category:`, // Model completes based on the pattern
+});
+```
+
+Providing examples massively improves reliability for specific formats. Clear labels and consistent formatting in examples are key!
+
+<Woz title="Few-Shot Example" description="See how prior examples guide the AI to generate similar outputs" prompt="Word Definition: Farduddle - To randomly dance vigorously. Word Example: After hearing the news, he started to farduddle uncontrollably. Word Definition: Vardudel - To procrastinate by organizing pencils. Word Example:"/>
+
+### Chain-of-Thought (CoT) Prompting: Think Step-by-Step
+
+Mimic human problem-solving by prompting the model to "think out loud" and break down a complex task into intermediate reasoning steps before giving the final answer.
+
+#### Example (Odd Numbers Sum):
+
+```
+Q: Do the odd numbers in [1, 4, 9, 10, 15, 22, 1] add up to an even number?
+A:
+The odd numbers are 1, 9, 15, 1.
+Their sum is 1 + 9 + 15 + 1 = 26.
+26 is an even number.
+The final answer is: Yes
+
+Q: Do the odd numbers in [3, 6, 7, 12, 19, 20, 5] add up to an even number?
+A:
+```
+
+Here's how you would use this style of prompt with the AI SDK:
+
+```javascript
+// Using CoT prompt structure with generateText
+const { text } = await generateText({
+  model: 'openai/gpt-5', // Often better with more capable models
+  prompt: `
+      Q: Calculate the total cost: 5 apples at $0.50 each, 2 bananas at $0.75 each.
+      A:
+      Cost of apples = 5 * $0.50 = $2.50
+      Cost of bananas = 2 * $0.75 = $1.50
+      Total cost = $2.50 + $1.50 = $4.00
+      The final answer is: $4.00
+
+      Q: Calculate the total cost: ${userOrder}
+      A: `, // Model generates steps and answer
+});
+```
+
+Showing the model "how to think" about the problem improves reliability for logic and complex reasoning. Combine this with few-shot. Remember that this technique **often performs best with more capable models.**
+
+<Woz title="Chain-of-Thought Example" description="See how the AI follows the reasoning pattern established in the first example" prompt="Q: Do the odd numbers in \[1, 4, 9, 10, 15, 22, 1\] add up to an even number? A: The odd numbers are 1, 9, 15, 1. Their sum is 1 + 9 + 15 + 1 = 26. 26 is an even number. The final answer is: Yes Q: Do the odd numbers in \[3, 6, 7, 12, 19, 20, 5\] add up to an even number? A:"/>
+
+### Core Prompting Advice for Builders
+
+Remember this crucial advice:
+
+1.  **Be Realistic:** Don't try to build Rome in a single prompt. Break complex application features into smaller, focused prompts for the AI SDK functions.
+2.  **Be Specific & Over-Explain:** Define _exactly_ what you want and don't want. Ambiguity leads to unpredictable results.
+3.  **Remember the Golden Rule:** Iterate aggressively. Nothing's perfect on the first try - keep testing and refining!
+
+![Ricky Bobby from Talladega Nights saying 'I'm not sure what to do with my hands'](/assets/aisdk-goldenrule.png)
+
+Don't leave the model wondering what to do with its hands!
+
+## Practice in the AI SDK Playground
+
+Before setting up your local environment, let's practice these prompting techniques using the [**AI SDK Playground**](https://ai-sdk.dev/playground). This web-based tool lets you experiment with prompts immediately - no setup required!
+
+The playground allows you to:
+
+*   Compare different prompts and models side-by-side
+*   Adjust parameters like temperature and max tokens
+*   Save and share your experiments
+*   Test structured output with schemas
+
+>Why This Practice Matters
+> * The AI SDK Playground lets you experiment with prompting techniques immediately. You're learning patterns that will power the `generateObject` and `generateText` calls you'll build in upcoming lessons.
+> * **Key insight:** Good prompts + structured schemas = reliable AI features in your applications!
+
+### Exercise 1: Few-Shot Prompting Practice
+
+Open the [AI SDK Playground](https://ai-sdk.dev/playground) and try this Few-Shot example:
+
+**Prompt to try:**
+
+```
+Categorize user feedback based on these examples:
+
+Example 1:
+Feedback: "Love the new design! So much easier to navigate."
+Category: praise, Sentiment: positive, Urgency: low
+
+Example 2:
+Feedback: "Need a dark mode option for night work."
+Category: feature, Sentiment: neutral, Urgency: medium
+
+Example 3:
+Feedback: "Login page won't load, can't access my account!"
+Category: bug, Sentiment: negative, Urgency: high
+
+Now categorize this feedback:
+"The app keeps crashing when I try to upload files. This is really frustrating!"
+```
+
+**What to observe:**
+
+*   How the examples guide the AI to follow the same format
+*   The consistency of categorization when you have clear patterns
+*   Try removing the examples and see how the output changes
+
+### Exercise 2: Chain-of-Thought Exploration
+
+In the playground, test this Chain-of-Thought prompt:
+
+**Prompt to try:**
+
+```
+Q: A company has 150 employees. They want teams of 8-12 people, but no team can have exactly 10. Teams should be as equal as possible. How should they organize?
+
+A: Let me work through this step by step.
+
+First, I need to find valid team sizes: 8, 9, 11, or 12 people.
+
+Let me try different combinations:
+- If I use 12-person teams: 150 ÷ 12 = 12.5, so I could have 12 teams of 12 (144 people) + 1 team of 6. But 6 is too small.
+- If I use 11-person teams: 150 ÷ 11 = 13.6, so I could have 13 teams of 11 (143 people) + 1 team of 7. But 7 is too small.
+
+Let me try mixing sizes...
+
+Q: If a small business wants to expand from 5 to 50 employees over 2 years, what should they consider?
+
+A:
+```
+
+**What to observe:**
+
+*   How step-by-step reasoning improves complex problem solving
+*   The difference in quality compared to a direct answer
+*   Try the same question without the Chain-of-Thought structure
+
+### Exercise 3: Schema-Guided Structured Output
+
+Switch to **structured output mode** in the playground and test this schema:
+
+**Schema:**
+
+```
+{
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": ["bug", "feature", "praise", "complaint"]
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": ["positive", "negative", "neutral"]
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    }
+  }
+}
+```
+
+**Prompt:** "Analyze this user feedback: 'Love the new search feature, but it's a bit slow when I type fast.'"
+
+## Further Reading (Optional)
+
+Prompt engineering is a vast, complex, and ever-evolving topic. Here are some resources to help you dive deeper:
+
+*   [Prompt Engineering Guide](https://www.promptingguide.ai/) — Community-driven open-source reference covering fundamentals, patterns, pitfalls, and interactive examples.
+*   [The Prompt Report: A Systematic Survey of Prompt Engineering Techniques](https://arxiv.org/abs/2406.06608) — Want a _deep_ dive into the vast world of prompt engineering? This comprehensive academic survey categorizes dozens of techniques. Advanced reading if you want to explore beyond the core techniques covered here.
+*   [OpenAI Cookbook – Prompt Engineering Examples](https://github.com/openai/openai-cookbook#prompt-engineering) — Official runnable notebooks showcasing tested prompt patterns and best practices with OpenAI models.
+*   [Anthropic Claude Prompting Guide](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — Official Claude documentation on prompt structure, guardrails, and safety considerations.
+*   [Anthropic Interactive Prompt Engineering Tutorial](https://github.com/anthropics/prompt-eng-interactive-tutorial) — Free, hands-on, 9-chapter course with exercises and playground demos for mastering Claude prompt engineering.
+*   [Vercel AI Chatbot Template Prompt Examples](https://github.com/vercel/ai-chatbot/blob/main/lib/ai/prompts.ts) — Explore how prompts are structured and used in a complete application. See examples of system prompts and task-specific instructions in the official Vercel AI Chatbot template. Also check the `artifacts/.../server.ts` files!
+
+## Next Step: Setting Up Your AI Dev Environment
+
+You've grasped the core prompting techniques and practiced implementing them with the AI SDK. Now it's time to prepare your local machine and set up your development environment with the necessary tools and API keys.
+
+The best way to solidify your prompting skills is by building real stuff. Let's get your environment ready so you can go from talking about prompts to implementing them in working code.

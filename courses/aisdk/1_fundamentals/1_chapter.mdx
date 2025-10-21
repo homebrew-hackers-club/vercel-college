@@ -1,0 +1,163 @@
+---
+title: Introduction to LLMs
+---
+
+Let's take a look at some code that programmatically generates an LLM response using the AI SDK and OpenAI's gpt-4.1 model:
+
+```javascript
+import { generateText } from 'ai';
+import 'dotenv/config';
+
+async function main() {
+  const { text } = await generateText({
+    model: 'openai/gpt-4.1', // Choose your model
+    prompt: 'Tell me a short, funny joke about web developers.', // Give it instructions
+  });
+
+  console.log(text); // Get the generation
+}
+
+main().catch(console.error);
+```
+
+Pick your model, provide instructions, get text back.
+
+Here's an example of how an LLM responds to a simple prompt:
+
+<Woz
+title="Example LLM Response"
+description="See how an LLM responds to a simple prompt"
+prompt="Tell me a short, witty joke about web developers"/>
+
+This is what you can think of as the LLM-as-API approach and it's a core mental model for working with LLMs programmatically. It's a way of considering LLMs that will help you understand how to use them and start shipping code immediately.
+
+Here's how the LLM process works:
+
+1.  **LLMs accept input** - You send text (a prompt) to the model
+2.  **LLMs predict what words come next** - The model uses patterns from its training to generate a response
+3.  **LLMs send the result** - You get the generated text back
+
+![Promps diagram](/assets/aisdk-prompts.png)
+
+That's all you need to understand to get started shipping code. It's the core of what an LLM actually is and what they can do for you. There's a lot more to it of course, so let's dive into some details about what "LLMs are APIs" means in practice.
+
+## LLMs Accept Input
+
+As a system, the LLM is always waiting for input to react to. Usually this input comes in the form of a prompt, or a piece of text that you send to the LLM to have it work against to generate a response.
+
+The quality of the input greatly affects the quality of the response you get back from the LLM.
+
+LLMs have a limit to the amount of input they can receive that is often referred to as a "context limit" or "context window" which represents the total amount of information that the LLM can use to generate a response.
+
+Think of it like the model's working memory - it can only "see" a certain amount of text at once. For example:
+
+*   GPT-4o-mini: ~128,000 tokens (roughly 100,000 words)
+*   GPT-4o: ~128,000 tokens
+*   Claude 3.5 Sonnet: ~200,000 tokens
+
+This affects your strategy: if you're building a chatbot, you might need to summarize old messages when the conversation gets too long. If you're analyzing documents, you might need to chunk them into smaller pieces.
+
+## LLMs Predict the Next "Token"
+
+LLMs are "just" a fancy autocomplete text generator. They predict what comes next based on patterns they've seen in their training and the current context of their prompt.
+
+They break text into "tokens" (words or chunks) and pick the most likely next token.
+
+![Next token diagram](/assets/aisdk-flow.png)
+
+In a library like the AI SDK when you call `generateText()` or `streamText()` to get a response from an LLM you're tapping this prediction engine.
+
+Unlike programming a computer where the results are typically deterministic and predictable, LLMs produce probabilistic and often unpredictable outputs.
+
+This means that provided the same input, the output the LLM generates can vary widely!
+
+Sometimes an LLM will confidently state something that's completely wrong (called "hallucination"). This probabilistic nature means building with LLMs requires different thinking than traditional programming.
+
+### Further Reading: Tokenization – The Building Blocks of LLMs
+
+Understanding tokens is crucial for working with LLMs — they impact costs, context windows, and performance.
+
+*   [OpenAI Tokenizer Tool](https://platform.openai.com/tokenizer) — See how your text gets split into tokens
+*   [Tokens and Context Windows Explained](https://platform.openai.com/docs/guides/text-generation/managing-tokens) — Learn how to work with token limits
+
+## How an LLM learns from the entire Internet
+
+LLMs train on massive text dumps (the whole internet + GitHub). The big labs like OpenAI, Anthropic, Meta, and others are scraping the entire internet for every scrap of consumable information that they can feed into training their frontier models. Think pattern recognition at a massive scale.
+
+All of them.
+
+The model parameter you choose (like `'openai/gpt-4.1'`) is choosing which pre-trained brain to rent.
+
+Bigger models are usually smarter but slower and usually more expensive. Bigger doesn't always mean better and not all models are created equal. They are trained on the same Internet, but ultimately models have sometimes subtle and other times drastic differences.
+
+### Garbage in = garbage out.
+
+A model is only as good as the data that it has available, which comes from two primary sources:
+
+*   The data that the model was trained on
+*   The data that is provided to the model by the user generally referred to as a prompt
+
+The quality of the responses you can expect from a model are directly related to the quality of the data that it has access to.
+
+These models inherit and retain the biases of their training data. This is important to keep in mind when you are working with their generated responses. When you are creating prompts they need to be focused and contain specific details and instructions to guide the LLM towards generating useful and accurate responses.
+
+## LLMs aren't just parrots
+
+If an LLM simply parroted back existing data it would be useless.
+
+They follow orders. Your prompt is an extremely important API parameter telling the model what to do. Without your prompt to guide the LLM it's unlikely to produce anything useful.
+
+Beyond the generation of text completion, LLMs can be given more decision making responsibility, search the live internet, call tools and apis, and within the context of your instructions provide all sorts of rich detailed information and utility.
+
+As you'll see soon, the AI SDK greatly simplifies the messy parts of interacting with an LLM. Asking for simple text is straightforward and the most basic use of an LLM.
+
+But if you're building more complex features and functionality in your applications, you'll find many ways to use LLMs.
+
+For example, what if you want more structured data based on a schema for validation? The AI SDK provides `generateObject()` that will produce predictable JSON responses from your prompts. This is very powerful in practice and unlocks a huge variety of use cases.
+
+## Think Through the API: Structured vs Unstructured
+
+The key insight is seeing LLMs as APIs that return different types of data. Let's think through this conceptually:
+
+**Scenario:** You want to analyze user feedback to improve your product.
+
+### Approach 1: generateText (Unstructured)
+
+```javascript
+// Conceptual example - you'll build this in lesson 4
+const { text } = await generateText({
+  model: 'openai/gpt-4.1',
+  prompt: 'Analyze this feedback: "The app crashes when uploading files"',
+});
+
+// Result: "This appears to be a bug report about file upload functionality..."
+// Problem: How do you extract the category? Sentiment? Priority?
+```
+
+**Challenge:** The response is human-readable text, but your app needs structured data to route tickets, trigger alerts, or update dashboards.
+
+### Approach 2: generateObject (Structured)
+
+```javascript
+// Conceptual example - you'll build this in Section 2
+const responseSchema = z.object({
+  category: z.enum(['bug', 'feature', 'praise']),
+  sentiment: z.enum(['positive', 'negative', 'neutral']),
+  priority: z.enum(['low', 'medium', 'high']),
+});
+
+const { object } = await generateObject({
+  model: 'openai/gpt-4.1',
+  prompt: 'Analyze this feedback: "The app crashes when uploading files"',
+  schema: responseSchema,
+});
+
+// Result: { category: 'bug', sentiment: 'negative', priority: 'high' }
+// Benefit: Ready-to-use data for your application logic!
+```
+
+**This is the power shift:** From parsing text responses to getting typed, validated data structures.
+
+## Next: The Power of Prompting
+
+You've probably heard of "prompt engineering". It's the art and science of giving instructions to an LLM to get the best possible output. That's what we will explore in the next lesson Prompting Fundamentals.

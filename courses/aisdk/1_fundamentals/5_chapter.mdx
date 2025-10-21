@@ -1,0 +1,326 @@
+---
+title: Model Types and Performance
+---
+
+Not all AI models are created equal. Some prioritize speed for real-time interactions, while others take time to think through complex problems. Understanding these differences is crucial for building great user experiences.
+
+In this lesson, you'll learn about the two main categories of models, fast and reasoning models, and when to use each.
+
+>Project Context
+>* We'll compare different model types using simple examples to understand their trade-offs. This knowledge will guide your model choices throughout the course.
+
+## Fast Models vs Reasoning Models
+
+The AI SDK gives you access to different types of models, each optimized for different use cases:
+
+### Fast Models (e.g., `openai/gpt-4.1`)
+
+**Characteristics:**
+
+*   Start responding immediately (< 1 second)
+*   Stream tokens as they're generated
+*   Great for real-time interactions
+*   Lower cost per token
+*   Best for straightforward tasks
+
+**Best for:**
+
+*   Chatbots and conversational interfaces
+*   Quick content generation
+*   Simple question answering
+*   Real-time assistance
+
+### Reasoning Models (e.g., `openai/gpt-5-mini`, `openai/o3`)
+
+**Characteristics:**
+
+*   Think before responding (5-15+ seconds)
+*   More thorough problem analysis
+*   Better at complex reasoning tasks
+*   Higher cost per token
+*   Best for difficult problems
+
+**Best for:**
+
+*   Complex problem solving
+*   Mathematical reasoning
+*   Code analysis and debugging
+*   Multi-step logical tasks
+*   Research and analysis
+
+## Hands-On: Build a Model Comparison Tool
+
+Let's create a practical script to experience the differences between fast and reasoning models:
+
+### Step 1: Create the Comparison Script
+
+Create `model-comparison.ts` in your project root:
+
+```typescript
+model-comparison.ts
+
+import { generateText } from 'ai';
+import 'dotenv/config';
+
+const complexProblem = `
+A company has 150 employees. They want to organize them into teams where:
+- Each team has between 8-12 people
+- No team should have exactly 10 people
+- Teams should be as equal in size as possible
+How should they organize the teams?
+`;
+
+async function compareFastVsReasoning() {
+  // TODO: Test fast model (gpt-4.1)
+  // - Record start time
+  // - Use generateText with the complex problem
+  // - Calculate and log the response time
+  // - Show first 200 characters of result
+
+  // TODO: Test reasoning model (gpt-5-mini)
+  // - Record start time
+  // - Use generateText with the same problem
+  // - Calculate and log the response time
+  // - Show first 200 characters of result
+
+  // TODO: Compare the results and timing
+}
+
+// TODO: Call the function to run your comparison
+// compareFastVsReasoning().catch(console.error);
+```
+
+### Step 2: Implement Fast Model Testing
+
+Replace the first TODO with:
+
+```typescript
+console.log('🚀 Testing fast model (gpt-4.1)...');
+const startFast = Date.now();
+
+const fastResult = await generateText({
+  model: 'openai/gpt-4.1',
+  prompt: complexProblem,
+});
+
+const fastTime = Date.now() - startFast;
+console.log(`⏱️  Fast model time: ${fastTime}ms`);
+console.log('📝 Result preview:', fastResult.text.substring(0, 200) + '...\n');
+```
+
+### Step 3: Implement Reasoning Model Testing
+
+Replace the second TODO with:
+
+```typescript
+console.log('🧠 Testing reasoning model (gpt-5-mini)...');
+const startReasoning = Date.now();
+
+const reasoningResult = await generateText({
+  model: 'openai/gpt-5-mini',
+  prompt: complexProblem,
+});
+
+const reasoningTime = Date.now() - startReasoning;
+console.log(`⏱️  Reasoning model time: ${reasoningTime}ms`);
+console.log('📝 Result preview:', reasoningResult.text.substring(0, 200) + '...\n');
+```
+
+### Step 4: Add Comparison Analysis
+
+Replace the third TODO with:
+
+```
+console.log('📊 Performance Comparison:');
+console.log(`- Fast model: ${fastTime}ms`);
+console.log(`- Reasoning model: ${reasoningTime}ms`);
+console.log(`- Speed difference: ${reasoningTime - fastTime}ms slower for reasoning`);
+
+console.log('\n🎯 Key Observations:');
+console.log('- Fast models start responding immediately');
+console.log('- Reasoning models think before responding');
+console.log('- Both solve the problem, but with different approaches');
+```
+
+### Step 5: Run Your Comparison
+
+Uncomment the function call and run:
+
+```bash
+pnpm tsx model-comparison.ts
+```
+
+**What You'll Experience:**
+
+*   **Fast model**: ~1-3 seconds, streams response immediately
+*   **Reasoning model**: ~10-15 seconds delay, then faster output
+
+> Real-World Application
+>> This timing difference directly impacts user experience:
+> *   **Fast models**: Perfect for chat interfaces where users expect immediate responses
+> *   **Reasoning models**: Better for complex analysis where users can wait for higher quality results
+>> Your model choice should match user expectations and use case requirements!
+
+**Typical Results:**
+
+*   **Fast model**: ~1-3 seconds, good answer
+*   **Reasoning model**: ~10-15 seconds, more thorough analysis
+
+## Choosing the Right Model
+
+Here's a decision framework:
+
+![Right model diagram](/assets/aisdk-rightmodel.png)
+
+## Model Selection Guidelines
+
+### Use Fast Models When:
+
+*   Building chatbots or conversational UI
+*   Users expect immediate responses
+*   Tasks are straightforward
+*   Streaming responses improve UX
+*   Cost efficiency is important
+
+### Use Reasoning Models When:
+
+*   Complex problem-solving is required
+*   Accuracy is more important than speed
+*   Users can wait for better results
+*   The task benefits from "thinking time"
+*   You can provide good loading states
+
+### Hybrid Approaches:
+
+*   Start with fast model for immediate response
+*   Offer "detailed analysis" with reasoning model
+*   Use fast model for chat, reasoning for reports
+*   Let users choose based on their needs
+
+## Performance Considerations
+
+### For Streaming Interfaces:
+
+**Fast Models:**
+
+```typescript
+// Visible streaming - tokens appear progressively
+const result = streamText({
+  model: 'openai/gpt-4.1', // Starts immediately
+  messages: [...],
+});
+```
+
+**Reasoning Models:**
+
+```typescript
+// Appears to "not stream" due to thinking time
+const result = streamText({
+  model: 'openai/gpt-5-mini', // 10+ second delay, then fast output
+  messages: [...],
+});
+```
+
+### User Experience Tips:
+
+**For Reasoning Models:**
+
+*   Show thinking/loading indicators
+*   Set proper expectations ("This might take 10-15 seconds")
+*   Consider progressive disclosure
+*   Provide cancel options for long requests
+
+**For Fast Models:**
+
+*   Embrace real-time streaming
+*   Keep interfaces responsive
+*   Handle quick back-and-forth conversations
+
+## Cost Considerations
+
+Reasoning models typically cost more per token due to their computational requirements:
+
+*   **Fast models**: Lower cost, faster throughput
+*   **Reasoning models**: Higher cost, better quality for complex tasks
+
+Factor this into your application's economics, especially for high-volume use cases.
+
+## Handling Reasoning Model UX
+
+When using reasoning models that take time to think, consider these UX patterns:
+
+**Loading States:**
+
+*   Show clear indicators that the AI is thinking
+*   Provide time estimates ("This might take 10-15 seconds")
+*   Consider progress indicators for long operations
+
+**Transparency:**
+
+*   Explain why the delay is happening
+*   Show the AI's reasoning process when appropriate
+*   Let users know they're getting higher quality results
+
+**User Control:**
+
+*   Provide cancel options for long-running requests
+*   Let users choose between fast and thorough responses
+*   Remember user preferences for future interactions
+
+## Real-World Examples
+
+### E-commerce Chatbot
+
+*   **Fast model** for product questions, order status
+*   **Reasoning model** for complex return policies, compatibility analysis
+*   **Loading states** while reasoning model analyzes recommendations
+
+### Code Editor Assistant
+
+*   **Fast model** for autocomplete, quick explanations
+*   **Reasoning model** for debugging, architecture reviews
+*   **Progress indicators** during complex code analysis
+
+### Educational Platform
+
+*   **Fast model** for casual Q&A, definitions
+*   **Reasoning model** for solving math problems, essay analysis
+*   **Step-by-step display** of problem-solving process
+
+## What You've Learned
+
+*   **Model Types**: Fast vs reasoning models serve different purposes
+*   **Trade-offs**: Speed vs thoroughness, cost vs quality
+*   **Selection Criteria**: Match model type to use case and user expectations
+*   **UX Considerations**: How model choice affects interface design
+*   **Cost Factors**: Balance performance needs with budget constraints
+
+Understanding these model characteristics will help you make informed decisions throughout the rest of the course. In the next section, we'll explore "invisible AI" techniques where model choice significantly impacts user experience.
+
+## Preview: What's Coming in Invisible AI
+
+You've learned the fundamentals - now it's time to build features users will love! In the next section, you'll discover how to:
+
+**🎯 Transform Text into Structured Data:**
+
+*   Use `generateObject` with Zod schemas for reliable, typed results
+*   Build smart categorization that sorts support tickets automatically
+*   Create extraction features like calendar event parsing from natural language
+
+**⚡ Choose the Right Model for the Job:**
+
+*   **Fast models (`openai/gpt-4.1`)** for real-time classification and extraction
+*   **Reasoning models (`openai/gpt-5-mini`)** for complex analysis and summarization
+*   Learn when speed vs accuracy matters for user experience
+
+**🔧 Practical Patterns You'll Build:**
+
+*   **Text Classification**: Automatically categorize user feedback, emails, or support requests
+*   **Smart Summarization**: Turn long threads into concise, actionable summaries
+*   **Data Extraction**: Parse natural language into structured calendar events, contacts, or forms
+
+These "invisible AI" features work behind the scenes to make your app feel magical - users get better experiences without realizing AI is helping!
+
+## Next Step: Invisible AI Techniques
+
+Now that you understand model types, you're ready to explore invisible AI - AI that works behind the scenes to enhance user experiences without requiring direct interaction.
