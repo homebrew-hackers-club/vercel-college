@@ -148,47 +148,11 @@ console.log('\n✅ Form ready to save - no manual input needed!');
 
 Try implementing the `smartEmailTriage` function on your own! Use a similar pattern with `generateObject` and a Zod schema for email categorization.
 
->💡 Learning with AI Assistance
->> **New to these prompts?** Throughout this course, you'll find structured prompts you can copy and use with ChatGPT, Claude, or other AI assistants. These help you explore design decisions (like schema choices, error handling strategies) without just giving you the answer. Think of them as guided discovery tools that model good prompt engineering while helping you learn.
->> **For this challenge:** If you're unsure about when to use `.optional()` vs `.nullable()` in your email triage schema, try this prompt:
-
-Prompt: Understanding Zod Optional vs Nullable
-
-```
-<context>
-I'm building an email triage feature using the Vercel AI SDK with generateObject and Zod schemas.
-I need to extract fields like priority, category, and suggested response from user emails.
-</context>
-
-<current-schema>
-const emailSchema = z.object({
-  category: z.string(),
-  priority: z.string(),
-  suggestedResponse: z.string(), // Should this be optional or nullable?
-});
-</current-schema>
-
-<question>
-What's the difference between `.optional()` and `.nullable()` in Zod schemas?
-
-When should I use each for fields that might not have a value?
-
-Specifically for my email triage case:
-- If an email is too complex for auto-response, I want no suggestedResponse field
-- Should I use `.optional()` or `.nullable()`?
-- How does this affect the AI's output from generateObject?
-
-Explain the difference with code examples showing when each should be used.
-</question>
-```
-
-This will help you understand the semantic difference and make your schema more robust!
-
 ### Test Your Work
 
 Once you've implemented both scripts, run them to see Invisible AI in action:
 
-```
+```bash
 # First, run your comparison to understand the difference
 pnpm invisible-ai:compare
 
@@ -196,15 +160,11 @@ pnpm invisible-ai:compare
 pnpm invisible-ai:demo
 ```
 
-What You've Built
-
-You've just implemented two key Invisible AI patterns:
-
-1.  **Text vs Structured Output** - You saw how `generateObject` gives you typed, ready-to-use data instead of strings you need to parse
-2.  **Smart Form Filling** - Natural language input automatically populates form fields
-3.  **Email Triage** (if you did the challenge) - Automatic categorization and prioritization
-
-These patterns are the foundation for countless Invisible AI features!
+> You've just implemented two key Invisible AI patterns:
+> 1.  **Text vs Structured Output** - You saw how `generateObject` gives you typed, ready-to-use data instead of strings you need to parse
+> 2.  **Smart Form Filling** - Natural language input automatically populates form fields
+> 3.  **Email Triage** (if you did the challenge) - Automatic categorization and prioritization
+>> These patterns are the foundation for countless Invisible AI features!
 
 ## You're Already Using Invisible AI. It's Everywhere.
 
@@ -223,14 +183,6 @@ These features don't scream "AI" - they just feel like good UX enhancing, but no
 *   **Invisible AI** = subtle features that make your app easier to use
 *   Reduces UX friction (activation energy) and delights users
 *   Powered by `generateObject` + Zod schemas for structured data generation
-
-Reflection Prompt
-
-Spotting Invisible AI
-
-What apps do you use with hidden AI features? Identify 1-2 examples. How do they improve UX? How could you build something similar with the AI SDK?
-
-Save Reflection
 
 ## Next Up: Building a Classification Engine
 

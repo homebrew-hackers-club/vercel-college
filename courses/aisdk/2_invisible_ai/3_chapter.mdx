@@ -1,0 +1,290 @@
+---
+title: Automatic Summarization
+---
+
+You've classified unstructured data with `generateObject` which is very useful. Now you'll tackle information overload. Long threads, dense articles, and feedback need summarization - a "TL;DR" feature to empower your users and reduce the noise of day-to-day work. You will build a summarization feature with `generateObject` to condense comments.
+
+## Too Much Text, Too Little Time
+
+We've all been there. You come back to a Slack channel or email thread with dozens of messages. Reading everything takes time you don't have, but you need the gist. Manual summarization is slow and prone to missing key details.
+
+This is a perfect job for AI.
+
+We can feed an entire conversation to the LLM and ask it to pull out the most essential information.
+
+<Woz 
+title="Summarization Example" 
+description="See how AI extracts key points from a conversation"
+prompt={`Summarize this conversation thread into key points:
+Alice: Hey team, I think we should redesign the homepage to highlight our new features.
+Bob: I agree, but we need to make sure it works on mobile devices too.
+Charlie: The redesign will take about 2 weeks. Can marketing wait that long?
+Alice: Yes, they said end of month is fine. Let's also add analytics tracking.
+Bob: Good call. I'll set up the tracking events today.
+Charlie: I'll create the design mockups by Friday for review.
+`}>
+
+## Setup: The Comment Thread App
+
+> Project Setup
+>> Continuing with the same codebase from **AI SDK Dev Setup**. For this section, you'll find the classification example files in the `app/(2-classification)/` directory.
+
+
+Navigate to the `app/(3-summarization)/summarization/` directory in your project.
+
+1.  **Run the Dev Server:** If it's not already running, start it: `pnpm dev`
+2.  **Open the Page:** Navigate to `http://localhost:3000/summarization` in your browser.
+
+You'll see a simple page displaying a list of comments (loaded from `messages.json`). Our task is to make the "Summarize" button functional.
+
+![Screenshot of the '/summarization' page showing the list of comments and the 'Summarize' button.](/assets/aisdk-summarization-pre.png)
+
+## Step 1: Building the Summarization Action
+
+We'll use a Next.js Server Action to handle the AI call.
+
+> What are Server Actions?
+> * Next.js Server Actions let you run secure server-side code directly from your React components without manually creating API routes. They're perfect for AI features because they keep your API keys and sensitive logic on the server while providing a seamless developer experience for calling backend functions from the frontend. Learn more about [Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations).
+
+1.  **Create `` `actions.ts` ``:** Inside the `app/(3-summarization)/summarization/` directory, create a new file named `actions.ts`.
+    
+2.  **Start with the basic setup:**
+    
+
+```typescript
+app/(3-summarization)/summarization/actions.ts
+
+'use server';
+
+import { generateObject } from 'ai';
+import { z } from 'zod';
+
+// TODO: Define the structure for our summary
+// Create a Zod schema with these fields:
+// - headline (string)
+// - context (string)
+// - discussionPoints (string)
+// - takeaways (string)
+
+export const generateSummary = async (comments: any[]) => {
+  console.log('Generating summary for', comments.length, 'comments...');
+
+  // TODO: Use generateObject to create the summary
+  // - Model: 'openai/gpt-4.1'
+  // - Prompt: Ask to summarize the comments, focusing on key decisions and action items
+  // - Schema: Use the schema you defined above
+  // - Return the generated summary object
+};
+```
+
+3.  **Now implement the schema and `generateObject` call:**
+
+```typescript
+app/(3-summarization)/summarization/actions.ts
+
+"use server";
+
+import { generateObject } from "ai";
+import { z } from "zod";
+
+const summarySchema = z.object({
+	headline: z.string(),
+	context: z.string(),
+	discussionPoints: z.string(),
+	takeaways: z.string(),
+});
+
+export const generateSummary = async (comments: any[]) => {
+	console.log("Generating summary for", comments.length, "comments...");
+	const { object: summary } = await generateObject({
+		model: "openai/gpt-4.1",
+		prompt: `Please summarize the following comments concisely, focusing on key decisions and action items.
+      Comments:
+      ${JSON.stringify(comments)}`,
+		schema: summarySchema,
+	});
+	console.log("Summary generated:", summary);
+	return summary;
+};
+```
+
+`generateObject` is versatile. You can use it with a Zod schema anytime you need structured JSON output from an LLM, whether for classification, summarization details, or data extraction.
+
+## Step 2: Wiring Up the Frontend
+
+Let's connect the button in `page.tsx` to our new server action. The file already has basic state set up.
+
+1.  **Add the necessary imports at the top of `page.tsx`:**
+
+```typescript
+app/(3-summarization)/summarization/page.tsx
+
+import { generateSummary } from './actions'; // Import the action
+import { SummaryCard } from './summary-card'; // Import the UI component
+
+// Define the expected type based on the action's return type
+type Summary = Awaited<ReturnType<typeof generateSummary>>;
+```
+
+2.  **Add state for the summary (after the existing loading state):**
+
+```typescript
+app/(3-summarization)/summarization/page.tsx
+
+// ... existing code ...
+export default function Home() {
+	const [loading, setLoading] = useState(false);
+	const [summary, setSummary] = useState<Summary | null>(null);
+  // ... existing code ...
+```
+
+3.  **Replace the button's onClick handler with the actual implementation and add a loading state:**
+
+```typescript
+app/(3-summarization)/summarization/page.tsx
+
+// ... existing code ...
+<Button
+  variant={"secondary"}
+  disabled={loading}
+  onClick={async () => {
+    setLoading(true);
+    setSummary(null); // Clear previous summary
+    try {
+      // Call the server action
+      const result = await generateSummary(messages);
+      setSummary(result); // Update state with the result
+    } catch (error) {
+      // Handle potential errors:
+      // - AI might fail schema validation (less likely with good prompts/schemas)
+      // - Network issues or API timeouts (especially with very large inputs)
+      console.error("Summarization failed:", error);
+      // TODO: Add user-friendly error feedback (e.g., toast notification)
+    } finally {
+      setLoading(false);
+    }
+  }}
+>
+  {loading ? "Summarizing..." : "Summarize"}
+</Button>
+```
+
+1.  **Conditionally Render the Summary:** Add the `SummaryCard` component, displaying it only when the `summary` state has data.
+
+```typescript
+app/(3-summarization)/summarization/page.tsx
+
+// ... existing code ...
+  </div>  
+  {summary && <SummaryCard {...summary} />}
+  <MessageList messages={messages} />
+</main>
+```
+
+## Step 3: Run and Observe (Initial Summary)
+
+Check your browser (ensure `pnpm run dev` is active). Click "Summarize".
+
+![Screenshot of the '/summarization' page showing summarized comments](/assets/aisdk-summarization-complete.png)
+
+The initial summary might work, but it could be verbose or unstructured.
+
+## Step 4: Refining with `.describe()`
+
+Let's improve the summary using Zod's `.describe()` method in `actions.ts` to give the AI more precise instructions.
+
+Update the schema in `actions.ts`:
+
+```typescript
+app/(3-summarization)/summarization/actions.ts
+
+// Update the summarySchema with detailed descriptions
+const summarySchema = z.object({
+  headline: z
+    .string()
+    .describe('The main topic or title of the summary. Max 5 words.'), // Concise headline
+  context: z.string().describe(
+    'Briefly explain the situation or background that led to this discussion. Max 2 sentences.', // Length guidance
+  ),
+  discussionPoints: z
+    .string()
+    .describe('Summarize the key topics discussed. Max 2 sentences.'), // Focused points
+  takeaways: z.string().describe(
+    'List the main decisions, action items, or next steps. **Include names** for assigned tasks. Max 2-3 bullet points or sentences.', // Specific instructions!
+  ),
+});
+
+// ... rest of the generateSummary function ...
+```
+
+![Screenshot of the '/summarization' page with enhanced schema](/assets/aisdk-course-summarization-enhance-schema.png)
+
+Key changes to the schema code:
+
+*   Added `.describe()` to every field.
+*   Provided specific guidance on length and content focus (e.g., "Include names").
+
+> Performance Note
+>* Summarizing very long conversations can take time and might hit model context limits or timeouts. For production apps with extensive text, consider techniques like chunking the input or using models with larger context windows.
+
+Save `actions.ts`, refresh the browser page, and click "Summarize" again. The output should now be much cleaner and follow your instructions more closely, especially the takeaways with assigned names!
+
+> 💡 Constraining Summary Output
+>> Want more control over summary length and format? Try asking an AI assistant:
+>```
+>Prompt: Controlling Summary Length and Structure
+><context>
+>I'm building an automatic summarization feature using Vercel AI SDK's generateObject with Zod schemas.
+>My current schema has fields: headline, context, discussionPoints, and takeaways.
+>I'm using `.describe()` to guide the AI, but the output is still too verbose.
+></context>
+>
+><current-schema>
+>const summarySchema = z.object({
+>  headline: z.string().describe('The main topic or title of the summary. Max 5 words.'),
+>  context: z.string().describe('Briefly explain the situation. Max 2 sentences.'),
+>  discussionPoints: z.string().describe('Summarize key topics. Max 2 sentences.'),
+>  takeaways: z.string().describe('List main decisions and action items. Max 2-3 bullet points.')
+>});
+></current-schema>
+>
+><problem>
+>Even with "Max 2 sentences" in the description, the AI is >>returning:
+>- Summaries that are 4-5 sentences long
+>- Bullet points that span multiple lines
+>- Inconsistent formatting (sometimes paragraphs, sometimes bullets)
+>
+>How can I enforce stricter length constraints and >consistent formatting?
+></problem>
+>
+><specific-questions>
+>1. Should I be more explicit in the prompt itself, not >just the schema descriptions?
+>2. Can I use Zod refinements to validate length after generation?
+>3. Are there better ways to phrase "Max X sentences" that the AI respects more consistently?
+>4. For bullet points specifically, how do I ensure the AI uses actual markdown bullets vs paragraphs?
+>
+>Provide concrete code examples showing the techniques that work best.
+></specific-questions>
+>```
+
+## Key Takeaways
+
+*   Summarization is a core Invisible AI task for handling information overload
+*   The AI SDK makes it easy to summarize using `generateObject` and a schema
+*   Structured extraction and summarization are powerful together
+
+### Further Reading: Handling Large Inputs for Summarization
+
+Real-world summarization often involves content that exceeds token limits.
+
+*   [MapReduce for LLM Summarization](https://blog.langchain.dev/applying-the-map-reduce-pattern-for-llm-summarization/) — Breaking down large documents into manageable chunks
+*   [Recursive Summarization Techniques](https://platform.openai.com/docs/guides/prompt-engineering/strategy-recursively-summarize-or-process-long-documents) — OpenAI's guide to summarizing large content
+*   [Token Window Management](https://ai-sdk.dev/docs/guides/managing-tokens) — Best practices for working within token limits
+
+## Next up: Precise Data with Structured Extraction
+
+You've classified and summarized so now you're ready to get even more precise by extracting specific details from text using `generateObject` and refined Zod schemas.
+
+This type of invisible AI starts to make mundane form entry a thing of the past.
+
+In the next lesson, you'll tackle structured extraction for appointments, handling challenges like relative dates with just a few tweaks.

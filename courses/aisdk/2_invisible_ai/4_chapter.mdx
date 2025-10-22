@@ -1,0 +1,373 @@
+---
+title: Structured Data Extraction
+---
+
+You've used AI to classify and summarize text. Now, get even more precise with **Structured Extraction**. This pulls _specific pieces_ of information from unstructured text and places them exactly where needed in your app.
+
+Use `generateObject` with a detailed Zod schema to extract appointment details from natural language input and display them using a v0-prototyped UI.
+
+> Project Setup
+>> Continuing with the same codebase from **AI SDK Dev Setup**. For this section, you'll find the classification example files in the `app/(4-extraction)/` directory.
+
+## The Problem: Turning Natural Language into Data
+
+Imagine typing "Lunch with Sarah next Tuesday at noon at Cafe Central" and having it automatically create a perfect calendar event with all the details filled in. Apps like Fantastical pioneered this kind of natural language processing - it seems like magic, but that's structured extraction in action!
+
+![Natural into data diagram](/assets/aisdk-natural-into-data.png)
+
+Manually parsing that input is a nightmare. Regex breaks easily, and complex parsing logic is brittle. But for an LLM? It's a natural fit. Models continue to improve giving better results at a lower cost.
+
+
+<Woz title="Appointment Extraction Example"
+description="See how AI extracts structured appointment details from natural language"
+prompt={`Extract appointment details from: "Team meeting with Lee and James next Monday at 10am in the conference room to discuss the Q3 roadmap. Use this schema to answer: 
+z.object({
+title: z.string().describe('The title of the event. Should be the main purpose, without names.'),
+startTime: z.string().nullable().describe('Appointment start time in HH:MM format (e.g., 14:00 for 2pm).'),
+endTime: z.string().nullable(),
+attendees: z.array(z.string()).nullable().describe('List of attendee names.'),
+location: z.string().nullable(),
+date: z.string().describe('The date of the appointment in YYYY-MM-DD format.')
+})"`}/>
+
+## Setup: The Appointment Extractor App
+
+Let's get your environment ready.
+
+1.  **Run the Dev Server:** Make sure it's running (`pnpm run dev`).
+2.  **Open the Page:** Navigate to `http://localhost:3000/extraction`.
+
+You'll see a simple UI: an input field to type appointment details and an empty calendar card below it (this is our `CalendarAppointment` component, built with Vercel v0. We'll explore this AI-powered UI generator in the next lesson).
+
+![Screenshot of the '/extraction' page showing the input field and the empty 'CalendarAppointment' card.](/assets/aisdk-course-sxtraction-setup.png)
+
+## Step 1: The Extraction Action (**`actions.ts`**)
+
+Like before, you will use a Server Action to handle the AI call.
+
+1.  **Create `schemas.ts`:** In `app/(4-extraction)/extraction/`, create the file `schemas.ts`.
+2.  **Start with this basic structure:**
+
+```typescript
+app/(4-extraction)/extraction/schemas.ts
+
+import { z } from 'zod';
+
+// TODO: Define the appointmentSchema with these fields:
+// - title (string)
+// - startTime (string, nullable)
+// - endTime (string, nullable)
+// - attendees (array of strings, nullable)
+// - location (string, nullable)
+// - date (string, required)
+
+// TODO: Export a type based on the schema using z.infer
+```
+
+3.  **Now implement the schema:**
+
+```typescript
+app/(4-extraction)/extraction/schemas.ts
+
+import { z } from "zod";
+
+export const appointmentSchema = z.object({
+	title: z.string(),
+	startTime: z.string().nullable(),
+	endTime: z.string().nullable(),
+	attendees: z.array(z.string()).nullable(),
+	location: z.string().nullable(),
+	date: z.string(),
+});
+
+export type AppointmentDetails = z.infer<typeof appointmentSchema>;
+```
+
+Why nullable() instead of optional()?
+
+In our experience, explicitly requiring a field but allowing `null` (`z.string().nullable()`) often yields more reliable results from LLMs than making the field entirely optional (`z.string().optional()`). It forces the model to consider the field and consciously decide if the information is present or not.
+
+4.  **Create `actions.ts`:** In `app/(4-extraction)/extraction/`, create the file `actions.ts`.
+5.  **Start with the basic setup:**
+
+```typescript
+app/(4-extraction)/extraction/actions.ts
+
+'use server';
+
+import { generateObject } from 'ai';
+import { appointmentSchema, type AppointmentDetails } from './schemas';
+
+export const extractAppointment = async (
+  input: string,
+): Promise<AppointmentDetails> => {
+  console.log(`Extracting from: "${input}"`);
+
+  // TODO: Use generateObject to extract appointment details
+  // - Model: 'openai/gpt-4.1'
+  // - Prompt: Ask to extract appointment details from the input
+  // - Schema: Use the appointmentSchema
+  // - Return the extracted details
+};
+```
+
+6.  **Now implement the extraction:**
+
+```typescript
+app/(4-extraction)/extraction/actions.ts
+
+"use server";
+
+import { generateObject } from "ai";
+import { appointmentSchema, type AppointmentDetails } from "./schemas";
+
+export const extractAppointment = async (
+	input: string,
+): Promise<AppointmentDetails> => {
+	console.log(`Extracting from: "${input}"`);
+
+	const { object: appointmentDetails } = await generateObject({
+		model: "openai/gpt-4.1",
+		prompt: `Extract the appointment details from the following natural language input:\n\n"${input}"`,
+		schema: appointmentSchema,
+	});
+
+	console.log("Extracted details:", appointmentDetails);
+	return appointmentDetails;
+};
+```
+
+## Step 2: Connecting the Frontend (page.tsx)
+
+No you'll make the form work.
+
+1.  **Open `app/(4-extraction)/extraction/page.tsx`.** The basic UI is already set up.
+    
+2.  **Add the necessary imports and state at the top of the file (after the existing imports):**
+    
+```typescript
+app/(4-extraction)/extraction/page.tsx
+
+// Add these imports
+import { extractAppointment } from './actions';
+import { type AppointmentDetails } from './schemas';
+
+// Inside the component, add state for the appointment data
+const [appointment, setAppointment] = useState<AppointmentDetails | null>(null);
+```
+
+3.  **Replace the handleSubmit function with the actual implementation:**
+
+```typescript
+app/(4-extraction)/extraction/page.tsx
+
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
+  setAppointment(null); // Clear previous results
+
+  const formData = new FormData(e.target as HTMLFormElement);
+  const input = formData.get('appointment') as string;
+
+  try {
+    const result = await extractAppointment(input);
+    setAppointment(result);
+  } catch (error) {
+    console.error('Extraction failed:', error);
+    // TODO: Show error to user
+  } finally {
+    setLoading(false);
+  }
+};
+```
+
+4.  **Pass the appointment data to the CalendarAppointment component:**
+
+Find the line with `<CalendarAppointment appointment={null} />` and replace it with:
+
+```typescript
+<CalendarAppointment appointment={appointment} />
+```
+
+The complete `page.tsx` file should look like this:
+
+```typescript
+app/(4-extraction)/extraction/page.tsx
+
+"use client";
+
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { CalendarAppointment } from "./calendar-appointment";
+import { extractAppointment } from "./actions";
+import { type AppointmentDetails } from "./schemas";
+
+export default function Page() {
+	const [loading, setLoading] = useState(false);
+	const [appointment, setAppointment] = useState<AppointmentDetails | null>(
+		null,
+	);
+
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		setLoading(true);
+		setAppointment(null); // Clear previous results
+
+		const formData = new FormData(e.target as HTMLFormElement);
+		const input = formData.get("appointment") as string;
+
+		try {
+			const result = await extractAppointment(input);
+			setAppointment(result);
+		} catch (error) {
+			console.error("Extraction failed:", error);
+			// TODO: Show error to user
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	return (
+		<div className="max-w-lg mx-auto px-4 py-8">
+			<div className="flex flex-col gap-6">
+				<Card>
+					<CardHeader>
+						<CardTitle>Extract Appointment</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<form onSubmit={handleSubmit} className="space-y-4">
+							<Input
+								name="appointment"
+								placeholder="Enter appointment details..."
+								className="w-full"
+							/>
+							<Button type="submit" className="w-full" disabled={loading}>
+								{loading ? "Extracting..." : "Extract Appointment"}
+							</Button>
+						</form>
+					</CardContent>
+				</Card>
+				<CalendarAppointment appointment={appointment} />
+			</div>
+		</div>
+	);
+}
+```
+
+## Step 3: Run and Observe (Initial Extraction)
+
+Let's test it! Go to `http://localhost:3000/extraction`.
+
+Enter: `Meeting with Guillermo Rauch about Next Conf Keynote Practice tomorrow at 2pm at Vercel HQ`
+
+Click "Extract Appointment".
+
+![Screenshot of the '/extraction' page showing the initial extraction results](/assets/aisdk-course-extraction-finish.png)
+
+The initial results might be okay, but not perfect (e.g., title includes names, date is wrong, time format is basic).
+
+## Step 4: Refining with **`.describe()`** - The Key!
+
+The initial results might work, but they could be imperfect (e.g., title includes names, date might be wrong, time format is basic).
+
+Let's improve our extraction using `.describe()` in our Zod schema. Update your `schemas.ts`:
+
+```typescript
+app/(4-extraction)/extraction/schemas.ts
+
+export const appointmentSchema = z.object({
+  title: z.string().describe(
+    'The title of the event. Should be the main purpose, concise, without names. Capitalize properly.'
+  ),
+  startTime: z
+    .string()
+    .nullable()
+    .describe('Appointment start time in HH:MM format (e.g., 14:00 for 2pm).'),
+  endTime: z.string().nullable().describe(
+    'Appointment end time in HH:MM format. If not specified, assume a 1-hour duration after startTime.'
+  ),
+  attendees: z.array(z.string()).nullable().describe(
+    'List of attendee names. Extract first and last names if available.'
+  ),
+  location: z.string().nullable(),
+  date: z.string().describe(
+    `The date of the appointment. Today's date is ${new Date().toISOString().split('T')[0]}. Use YYYY-MM-DD format.`
+  ),
+});
+```
+
+Key refinements:
+
+*   **Title**: Clear instructions to exclude names and be concise
+*   **Time**: Specific format requirements (24-hour HH:MM)
+*   **Date**: Provides today's date for correct relative date calculation
+*   **Attendees**: Instructions on extracting full names
+
+Save `schemas.ts`, refresh the browser, and test again with the same input. The extraction should now be much more accurate!
+
+![Screenshot of the '/extraction' page showing the refined extraction results](/assets/aisdk-course-extraction-refined.png)
+
+> 💡 Handling Relative Dates and Time Formats
+>>Struggling with date parsing or time format inconsistencies? Try asking an AI assistant:
+>```
+><context>
+>I'm building an appointment extraction feature using Vercel AI SDK's generateObject with Zod schemas.
+>My schema extracts: title, startTime, endTime, attendees, location, and date.
+>I'm using `.describe()` to guide the AI, including providing today's date for context.
+></context>
+>
+><current-schema>
+>export const appointmentSchema = z.object({
+>  title: z.string().describe('The title of the event. Should be the main purpose, without names.'),
+>  startTime: z.string().nullable().describe('Appointment start time in HH:MM format (e.g., 14:00 for 2pm).'),
+> endTime: z.string().nullable().describe('Appointment end time in HH:MM format. If not specified, assume 1-hour duration.'),
+>  attendees: z.array(z.string()).nullable().describe('List of attendee names.'),
+>  location: z.string().nullable(),
+>  date: z.string().describe(`The date of the appointment. Today's date is ${new Date().toISOString().split('T')[0]}. Use YYYY-MM-DD format.`)
+> });
+></current-schema>
+>
+><problems>
+>1. **Relative dates are inconsistent:**
+>   - "tomorrow" sometimes calculates correctly, sometimes returns today
+>   - "next Tuesday" occasionally picks the wrong week
+>   - "in 3 days" sometimes fails entirely
+>
+>2. **Time formats vary:**
+>   - Sometimes get "2pm" instead of "14:00"
+>   - "2:30pm" becomes "2:30" (missing hour padding)
+>   - Ambiguous times like "morning" or "afternoon" return null
+>
+>3. **Missing endTime logic:**
+>   - Even with "assume 1-hour duration" in description, endTime often stays null
+></problems>
+>
+><questions>
+>1. Should I provide more context in the date description? Like day of week for today?
+>2. For time format enforcement, should I use Zod `.regex()` or `.refine()` to validate HH:MM format?
+>3. How can I make the AI more reliably calculate endTime when not specified?
+>4. Would it help to include example inputs/outputs in the schema descriptions?
+></questions>
+>
+><specific-test-case>
+>Input: "Quick sync with Lee tomorrow morning"
+>Expected: date=2025-09-30, startTime="09:00", endTime="10:00"
+>Actual: date=2025-09-29 (wrong), startTime=null, endTime=null
+>
+>Show me the improved schema with context injection that fixes this specific case.
+></specific-test-case>
+>```
+
+## Key Things to Consider
+
+*   Structured Extraction pulls specific data points from unstructured text into a defined format.
+*   generateObject + Zod Schema is the ideal tool combination.
+*   Use `nullable()` for potentially missing fields.
+*   `.describe()` is essential for specifying formats, providing context (like today's date), and defining default logic.
+*   Sharing Zod schemas between backend (actions) and frontend provides end-to-end type safety.
+
+## Next Step: Supercharge UI with Vercel v0
+
+You've seen how structured data unlocks practical features like calendar extraction and form filling. Now, take a quick (optional) detour to explore Vercel v0, the tool that was used to prototype the `CalendarAppointment` UI in this example. You'll get hands-on experience generating UI components directly from prompts, accelerating your frontend development for AI features.

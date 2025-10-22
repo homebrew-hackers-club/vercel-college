@@ -1,0 +1,297 @@
+---
+title: Basic Chatbot
+---
+
+You've been using AI behind the scenes for classification, summarization, and extraction. Now let's build something that everyone recognizes; a ChatGPT-style conversational interface. Over the next five lessons, you'll start with the fundamentals of streaming chat, then progressively add the features that make these interfaces powerful: professional UI components, system prompts for personality, tool calling to connect with real-world data, and multi-step reasoning with dynamic UI generation.
+
+We'll begin with the core architecture that powers every AI chat interface:
+
+*   Set up an API route that uses `streamText`.
+*   Implement the frontend with `useChat`.
+
+> Project Context
+>* We're working in `app/(5-chatbot)/` directory. Same project setup as before, but now we're building both server and client sides.
+
+## Chatbot Architecture Overview
+
+Your chatbot will have two parts: backend + frontend. The backend connects to the LLM and provides the frontend with an API to use. The backend is required because calling the LLM apis requires secret token, authentication, rate limiting, and other functionality that runs on the server.
+
+The frontend is what the user interacts with in the browser. It's the UI.
+
+![Chatbot architecture](/assets/aisdk-chatbot-architecture.png)
+
+## Step 1: Create Route Handler
+
+First, create the API endpoint that will handle chat requests from your frontend.
+
+> What are Next.js Route Handlers?
+> * [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers) are serverless endpoints in your Next.js app. They can live anywhere in the `app/` directory (not just `/api/`), though we'll use the `/api/` convention here. No separate backend needed - perfect for AI functionality.
+
+1.  **Create the file:** `app/api/chat/route.ts`
+    
+2.  **Start with this basic structure:**
+    
+
+```typescript
+app/api/chat/route.ts
+
+import { streamText, convertToModelMessages } from 'ai';
+
+// Allow streaming responses up to 30 seconds
+export const maxDuration = 30;
+
+export async function POST(req: Request) {
+  // TODO: Extract messages from the request body
+
+  // TODO: Create a streamText call with:
+  // - model: 'openai/gpt-4.1'
+  // - messages: converted using convertToModelMessages
+
+  // TODO: Return the stream response using toUIMessageStreamResponse()
+}
+```
+
+3.  **Now implement the streaming chat endpoint:**
+
+```typescript
+app/api/chat/route.ts
+
+import { streamText, convertToModelMessages } from "ai";
+
+// Allow streaming responses up to 30 seconds
+export const maxDuration = 30;
+
+export async function POST(req: Request) {
+  try {
+    const { messages } = await req.json();
+
+    const result = streamText({
+      model: "openai/gpt-4.1", // Fast model for real-time chat (immediate streaming, low latency)
+                                // Reasoning models ('openai/gpt-5') would add 10-15s delay - poor UX for chat
+      messages: convertToModelMessages(messages),
+    });
+
+    return result.toUIMessageStreamResponse();
+  } catch (error) {
+    console.error("Chat API error:", error);
+
+    // Return a proper error response
+    return new Response(
+      JSON.stringify({
+        error: "Failed to process chat request",
+        details: error instanceof Error ? error.message : "Unknown error",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
+}
+```
+
+Key components explained:
+
+*   `streamText` - Enables real-time streaming from the AI model
+*   `convertToModelMessages` - Converts frontend message format to AI model format
+*   `toUIMessageStreamResponse()` - Formats the stream for the frontend to consume
+
+## Step 2: Implement Frontend with useChat
+
+Now let's build the UI using the `useChat` hook. Open `app/(5-chatbot)/chat/page.tsx` and replace the placeholder content.
+
+1.  **Start with the imports and basic setup:**
+
+```typescript
+app/(5-chatbot)/chat/page.tsx
+
+'use client';
+
+import { useChat } from '@ai-sdk/react';
+import { useState } from 'react';
+
+export default function Chat() {
+  const [input, setInput] = useState('');
+
+  // TODO: Initialize useChat hook
+  // - Extract: messages and sendMessage
+
+  return (
+    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+      {/* TODO: Display messages here */}
+
+      {/* TODO: Add input form here */}
+    </div>
+  );
+}
+```
+
+2.  **Add the useChat hook and message display:**
+
+```typescript
+app/(5-chatbot)/chat/page.tsx
+
+"use client";
+
+import { useChat } from "@ai-sdk/react";
+import { useState } from "react";
+
+export default function Chat() {
+	const [input, setInput] = useState("");
+	const { messages, sendMessage } = useChat();
+
+	return (
+		<div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+			{messages.map((message) => (
+				<div key={message.id} className="whitespace-pre-wrap mb-4">
+					<strong>{message.role === "user" ? "User: " : "AI: "}</strong>
+					{message.parts?.map(
+						(part, i) =>
+							part.type === "text" && (
+								<span key={`${message.id}-${i}`}>{part.text}</span>
+							),
+					)}
+				</div>
+			))}
+
+			{/* TODO: Add input form here */}
+		</div>
+	);
+}
+```
+
+> Default API Endpoint
+>* The `useChat` hook automatically uses `/api/chat` as its endpoint. If you need a different endpoint or custom transport behavior, check out the [transport documentation](https://ai-sdk.dev/docs/ai-sdk-ui/transport).
+
+3.  **Add the input form:**
+
+```typescript
+app/(5-chatbot)/chat/page.tsx
+
+"use client";
+
+import { useChat } from "@ai-sdk/react";
+import { useState } from "react";
+
+export default function Chat() {
+	const [input, setInput] = useState("");
+	const { messages, sendMessage } = useChat();
+
+	return (
+		<div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+			{messages.map((message) => (
+				<div key={message.id} className="whitespace-pre-wrap mb-4">
+					<strong>{message.role === "user" ? "User: " : "AI: "}</strong>
+					{message.parts?.map(
+						(part, i) =>
+							part.type === "text" && (
+								<span key={`${message.id}-${i}`}>{part.text}</span>
+							),
+					)}
+				</div>
+			))}
+
+			<form
+				onSubmit={async (e) => {
+					e.preventDefault();
+					if (!input.trim()) return;
+
+					try {
+						await sendMessage({ text: input });
+						setInput("");
+					} catch (error) {
+						console.error("Failed to send message:", error);
+						// TODO: Show user-friendly error message
+						// You could add a toast notification here
+					}
+				}}
+			>
+				<input
+					className="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
+					value={input}
+					placeholder="Say something..."
+					onChange={(e) => setInput(e.target.value)}
+				/>
+			</form>
+		</div>
+	);
+}
+```
+
+How it works:
+
+*   `useChat()` manages the entire chat state and API communication
+*   `messages` contains the conversation history
+*   `sendMessage()` sends user input to your API
+*   Messages have `parts` for different content types (text, tool calls, etc.)
+
+The combination of `streamText` and `useChat` handles most of the streaming complexity for you - no manual WebSocket management or stream parsing needed.
+
+## Step 3: Test Your Chatbot
+
+Run the development server:
+
+```bash
+pnpm dev
+```
+
+Navigate to [`http://localhost:3000/chat`](http://localhost:3000/chat)
+
+Try it out - type a message and hit Enter. Watch the AI response appear in real time!
+
+![simple chat UI. User types 'Hello!' and presses Enter. AI response 'Hello there! How can I help you today?' streams into the chat window.](/assets/aisdk-course-basic-streaming-chat.gif)
+
+## Experience the Limitations
+
+Before moving on, test these scenarios to understand why we need better tooling:
+
+1.  **Ask for code**: "Write a Python function to calculate fibonacci numbers"
+    
+    *   Notice how code blocks appear as raw \`\`\` text
+2.  **Have a long conversation**: Keep chatting until messages go below the fold
+    
+    *   You'll have to manually scroll to see new responses
+3.  **Ask for formatted content**: "Explain AI with headers and lists"
+    
+    *   Markdown formatting shows as plain text
+4.  **Refresh the page**: All your conversation history disappears
+    
+5.  **Try to edit a long prompt**: The single-line input is limiting
+    
+
+These aren't bugs - they're missing features that every chat interface needs.
+
+> Model Choice for Streaming
+>* We use `openai/gpt-4.1` for fast, visible streaming responses. Unlike reasoning models like `openai/gpt-5-mini` (which think for 10-15 seconds before streaming), `gpt-4.1` starts streaming immediately for a responsive user experience. Swap out the model in the `streamText` call to `openai/gpt-5-mini` to see the difference.
+
+## What you've built so far:
+
+*   Two components: Backend (`streamText` API route) + Frontend (`useChat` component)
+*   `streamText` manages server-side AI calls and streaming
+*   `useChat` handles UI state, messages, and API calls
+*   `toUIMessageStreamResponse()` connects backend to frontend
+*   display the messages in the UI by parsing the response from the backend
+
+>Feeling the Pain Yet?
+>> Notice how much custom code we had to write just for basic functionality? Try having a longer conversation and watch the problems pile up:
+>
+>**Immediate Issues You'll Notice:**
+>
+>*   **No markdown rendering** - If the AI sends code blocks or formatting, they show as raw text
+>*   **No auto-scrolling** - New messages appear below the viewport, you have to manually scroll
+>*   **Basic styling** - Just "User:" and "AI:" labels, no proper message bubbles
+>*   **Fixed input weirdness** - The input floats awkwardly at the bottom
+>
+>**Missing Features You'll Need:**
+>
+>*   **Loading indicators** - No visual feedback while waiting for AI
+>*   **Error handling** - If the API fails, users see nothing
+>*   **Multi-line input** - Can't compose longer messages easily
+>*   **Message persistence** - Refresh = conversation gone
+>*   **Code syntax highlighting** - Code examples are unreadable
+>
+>You could spend weeks building all this from scratch... or there might be a better way. 🤔
+
+## Next Step: A Professional Solution
+
+In the next lesson, we'll discover how to transform this basic chatbot into a professional interface with a single command. Get ready to have your mind blown by AI SDK Elements!

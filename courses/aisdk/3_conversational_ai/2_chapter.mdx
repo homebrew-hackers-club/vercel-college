@@ -1,0 +1,428 @@
+---
+title: AI Elements
+---
+
+Remember all that custom UI code we just wrote? The manual state management, the scroll behavior, the message formatting? Professional chat interfaces like ChatGPT, Claude, and Cursor use sophisticated component systems to handle these complexities.
+
+**AI Elements gives you that same power - let's transform your basic chat into something production-ready.**
+
+## Introducing AI SDK Elements
+
+The AI SDK team has built **Elements** - a comprehensive component library specifically designed for AI applications. It's built on top of shadcn/ui and provides everything you need out of the box.
+
+> What are AI SDK Elements?
+>
+>[Elements](https://ai-sdk.dev/elements/overview) is a collection of 20+ production-ready React components designed specifically for AI interfaces. These components are tightly integrated with AI SDK hooks like `useChat`, handling the unique challenges of streaming responses, tool displays, and markdown rendering that standard React components don't address.
+>
+>Unlike regular UI libraries, Elements understands AI-specific patterns - message parts, streaming states, tool calls, and reasoning displays - making it the perfect companion to the AI SDK.
+
+## Installing Elements
+
+Let's transform our chatbot with a single command:
+
+```bash
+pnpm dlx ai-elements@latest
+```
+
+When prompted, press **Enter** to confirm the installation path, and select **Yes** when asked about overwriting existing components.
+
+What happens during installation?
+
+## The New Components
+
+After installation, check out what you now have in `components/ai-elements/`:
+
+*   **Conversation** - Handles the entire chat container with auto-scrolling
+*   **Message** - Properly styled message display with role-based alignment
+*   **Response** - Markdown renderer with syntax highlighting
+*   **PromptInput** - Smart input with auto-resize and attachment support
+*   **Reasoning** - Displays AI thought processes (for reasoning models)
+*   **Tool** - Displays tool usage in conversations
+*   And 14 more specialized components!
+
+## Step 1: Add the Elements Imports
+
+First, we need to import all the Elements components we'll be using. Add these imports at the top of your `app/(5-chatbot)/chat/page.tsx` file, right after your existing imports:
+
+```typescript
+app/(5-chatbot)/chat/page.tsx
+
+// Your existing imports
+'use client';
+import { useState } from 'react';
+import { useChat } from '@ai-sdk/react';
+
+// Add ALL these new Elements imports
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState
+} from "@/components/ai-elements/conversation";
+import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputSubmit
+} from "@/components/ai-elements/prompt-input";
+```
+
+With the imports ready, we can now progressively replace each part of the UI.
+
+## Step 2: Replace the Message Display
+
+Now let's replace how messages are displayed using Elements' `Message` component.
+
+**Update just the message rendering part (around line 12-20):**
+
+```typescript
+// Replace this:
+{messages.map(message => (
+  <div key={message.id} className="whitespace-pre-wrap mb-4">
+    <strong>{message.role === 'user' ? 'User: ' : 'AI: '}</strong>
+    {message.parts?.map((part, i) =>
+      part.type === 'text' &&
+      <span key={`${message.id}-${i}`}>{part.text}</span>
+    )}
+  </div>
+))}
+
+// With this:
+{messages.map((message) => (
+  <Message key={message.id} from={message.role}>
+    <MessageContent>
+      {message.parts?.map((part) =>
+        part.type === 'text' && part.text
+      )}
+    </MessageContent>
+  </Message>
+))}
+```
+
+![Screenshot of the chatbot with proper message bubbles](/assets/aisdk-course-message-bubbles.png)
+
+Save and test. You'll see proper message bubbles instead of "User:" and "AI:" labels! But we still have the scrolling issues and basic input.
+
+## Step 3: Add Smart Scrolling with Conversation Container
+
+Now let's wrap everything in the `Conversation` component which handles auto-scrolling.
+
+**Wrap your messages in the Conversation components (you already have the imports from Step 1):**
+
+```jsx
+// Replace the outer div and message list with:
+<div className="flex flex-col h-screen">
+  <Conversation>
+    <ConversationContent>
+      {messages.length === 0 ? (
+        <ConversationEmptyState
+          title="Start a conversation"
+          description="Type a message below to begin"
+        />
+      ) : (
+        // Your existing message map code here
+        messages.map((message) => (
+          <Message key={message.id} from={message.role}>
+            <MessageContent>
+              {message.parts?.map((part) =>
+                part.type === 'text' && part.text
+              )}
+            </MessageContent>
+          </Message>
+        ))
+      )}
+    </ConversationContent>
+  </Conversation>
+
+  {/* Keep your existing input form here for now */}
+</div>
+```
+
+Test again with a more complex prompt - now messages stay in view and the view scrolls as they stream in! Plus you get a nice empty state.
+
+The text input is poorly formatted and needs to be updated too.
+
+## Step 4: Upgrade the Input with PromptInput
+
+Finally, let's replace the basic input with Elements' smart input components.
+
+**Update the status handling (you already have the imports from Step 1):**
+
+```typescript
+// add `status` to the useChat hook
+const { messages, sendMessage, status } = useChat();
+
+// add `isLoading` based on the current status
+const isLoading = status === "streaming" || status === "submitted";
+```
+
+**Replace your form with the PromptInput components:**
+
+```jsx
+// Replace your entire <form> with:
+<div className="border-t p-4">
+  <PromptInput
+    onSubmit={(message, event) => {
+      event.preventDefault();
+      if (message.text) {
+        sendMessage({ text: message.text });
+        setInput("");
+      }
+    }}
+    className="max-w-3xl mx-auto flex gap-2 items-end"
+  >
+    <PromptInputTextarea
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      placeholder="Type your message..."
+      disabled={isLoading}
+      rows={1}
+      className="flex-1"
+    />
+    <PromptInputSubmit disabled={isLoading} />
+  </PromptInput>
+</div>
+```
+
+## Testing After All Four Steps
+
+Save your changes and test the chatbot:
+
+```bash
+pnpm dev
+```
+
+Navigate to [http://localhost:3000/chat](http://localhost:3000/chat) and try it out. After these incremental improvements, you'll notice:
+
+*   ✅ **Step 1: All imports ready** - Set up for success
+*   ✅ **Step 2: Professional message bubbles** - Much better than "User:" and "AI:" labels
+*   ✅ **Step 3: Auto-scrolling & empty state** - Messages stay in view, clean UI when no messages
+*   ✅ **Step 4: Smart input field** - With a proper send button and better UX
+*   ❌ **But wait...** Ask the AI to write code and you'll see markdown symbols like \`\`\` instead of formatted code blocks!
+
+> Four Steps Complete
+>
+>We've incrementally replaced our custom UI with Elements components:
+>
+>1.  Added all the necessary imports upfront
+>2.  Upgraded just the message display
+>3.  Added smart scrolling with Conversation container
+>4.  Upgraded the input with PromptInput
+>
+>The interface looks professional, but markdown isn't rendering yet. Let's fix that next!
+
+## Step 5: Enable Markdown Rendering with Response Component
+
+The messages look better, but markdown isn't rendering. Elements includes a `Response` component that handles markdown beautifully. Let's use it for AI messages:
+
+```jsx
+// Add this import at the top
+import { Response } from "@/components/ai-elements/response";
+
+// Then update the message rendering part:
+messages.map((message) => (
+  <Message key={message.id} from={message.role}>
+    <MessageContent>
+      {message.role === 'assistant' ? (
+        <Response>
+          {message.parts
+            ?.filter(part => part.type === 'text')
+            .map(part => part.text)
+            .join('')}
+        </Response>  // 👈 Wrap AI messages in Response
+      ) : (
+        message.parts?.map((part) =>
+          part.type === 'text' && part.text
+        )
+      )}
+    </MessageContent>
+  </Message>
+))
+```
+
+### The Magic Moment ✨
+
+Refresh your browser and ask the AI to write code again. Try: "give me a react app that uses the ai sdk to build a chat"
+
+![Screenshot of the chatbot with properly formatted code blocks](/assets/aisdk-streaming-formatted-chat.gif)
+
+**BOOM!** Look at the transformation:
+
+*   ✅ **Syntax-highlighted code blocks** - Beautiful, readable code
+*   ✅ **Copy and download buttons** - Professional code block features
+*   ✅ **Proper markdown formatting** - Headers, lists, bold, italic
+*   ✅ **Inline code styling** - `code` appears formatted
+*   ✅ **Professional presentation** - Looks like ChatGPT or Claude
+
+With just **one component change**, you've transformed raw markdown text into beautifully formatted content!
+
+>Performance Note
+>
+>The `Response` component is optimized for streaming - it efficiently handles incremental markdown updates without re-parsing the entire content on each stream chunk. This is crucial for maintaining smooth performance during AI responses.
+
+## The Complete Code
+
+Here's the final version with both improvements:
+
+
+```typescript
+app/(5-chatbot)/chat/page.tsx
+
+"use client";
+
+import { useChat } from "@ai-sdk/react";
+import { useState } from "react";
+
+import {
+	Conversation,
+	ConversationContent,
+	ConversationEmptyState,
+} from "@/components/ai-elements/conversation";
+import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+	PromptInput,
+	PromptInputTextarea,
+	PromptInputSubmit,
+} from "@/components/ai-elements/prompt-input";
+import { Response } from "@/components/ai-elements/response";
+
+export default function Chat() {
+	const [input, setInput] = useState("");
+	const { messages, sendMessage, status } = useChat();
+
+	const isLoading = status === "streaming" || status === "submitted";
+
+	return (
+		<div className="flex flex-col h-screen">
+			<Conversation>
+				<ConversationContent>
+					{messages.length === 0 ? (
+						<ConversationEmptyState
+							title="Start a conversation"
+							description="Type a message below to begin"
+						/>
+					) : (
+						messages.map((message) => (
+							<Message key={message.id} from={message.role}>
+								<MessageContent>
+									{message.role === "assistant" ? (
+										<Response>
+											{message.parts
+												?.filter((part) => part.type === "text")
+												.map((part) => part.text)
+												.join("")}
+										</Response> // 👈 Wrap AI messages in Response
+									) : (
+										message.parts?.map(
+											(part) => part.type === "text" && part.text,
+										)
+									)}
+								</MessageContent>
+							</Message>
+						))
+					)}
+				</ConversationContent>
+			</Conversation>
+
+			<div className="border-t p-4">
+				<PromptInput
+					onSubmit={(message, event) => {
+						event.preventDefault();
+						if (message.text) {
+							sendMessage({ text: message.text });
+							setInput("");
+						}
+					}}
+					className="max-w-3xl mx-auto flex gap-2 items-end"
+				>
+					<PromptInputTextarea
+						value={input}
+						onChange={(e) => setInput(e.target.value)}
+						placeholder="Type your message..."
+						disabled={isLoading}
+						rows={1}
+						className="flex-1"
+					/>
+					<PromptInputSubmit disabled={isLoading} />
+				</PromptInput>
+			</div>
+		</div>
+	);
+}
+```
+
+## The Transformation Summary
+
+Look at what we accomplished in two simple steps:
+
+**Before (Custom UI)**
+
+*   100+ lines of code
+*   Manual scroll management
+*   Raw markdown text
+*   No code highlighting
+*   Basic "User:" / "AI:" labels
+*   Fixed input position issues
+
+**After (Elements)**
+
+*   ~60 lines of clean code
+*   Auto-scrolling built-in
+*   Beautiful markdown rendering
+*   Syntax-highlighted code blocks
+*   Professional message bubbles
+*   Smart input with send button
+
+## What Else is in Elements?
+
+You've installed 20+ components with Elements. While we're focusing on the chat basics now, here's what else you have available:
+
+*   **Tool Component** - We'll use this when we add weather checking and tool calling
+*   **Reasoning Component** - Shows AI's thought process (for models like o1)
+*   **Suggestion Component** - Quick reply buttons below the input
+*   **Attachment Component** - File upload support
+*   **Citation Component** - Source references in responses
+
+Don't worry about implementing these now - we'll explore tool usage in the upcoming lessons where you'll see these components in action.
+
+## Why This Matters
+
+You've just experienced firsthand why component libraries exist. Elements didn't just save you time - it provided:
+
+*   ✅ **Battle-tested solutions** to common problems
+*   ✅ **Accessibility features** built-in
+*   ✅ **Performance optimizations** you didn't have to think about
+*   ✅ **Consistent design patterns** across your app
+*   ✅ **Professional polish** that would take weeks to build yourself
+
+## Next Steps
+
+Now that we have a solid foundation with Elements, we can focus on what really matters - the AI functionality. In the next lessons, we'll explore:
+
+*   Adding personality with system prompts
+*   Integrating reasoning models
+*   File attachments and multimodal input
+*   Tool use and function calling
+*   Citations and source tracking
+
+All using the professional components from Elements!
+
+Setup Checklist
+
+*   AI SDK Elements installed successfully?
+*   All Elements imports added?
+*   Messages displaying with proper bubbles?
+*   Auto-scrolling working?
+*   Smart input with send button?
+*   Markdown rendering enabled?
+
+> Explore More Elements Components
+>
+> Elements includes 20+ components beyond what we've used:
+>
+>*   **Suggestions** - Quick prompts below the input
+>*   **Loader** - Custom loading indicators for streaming
+>*   **ChainOfThought** - Visualize reasoning steps
+>*   **Branch** - Enable conversation forking
+>*   **TypingIndicator** - Show when AI is responding
+>
+>Browse `components/ai-elements/` to discover more components and enhance your chat interface!

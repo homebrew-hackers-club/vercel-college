@@ -1,0 +1,214 @@
+---
+title: System Prompts
+---
+
+Now that we have a professional chat interface with Elements, let's give our AI some personality!
+
+System prompts are like **permanent instructions** that shape how your AI behaves throughout an entire conversation. While user messages change with each interaction, the system prompt remains constant, ensuring consistent personality and behavior.
+
+>Building on Elements
+>
+>We'll be modifying the API route while keeping our beautiful Elements UI from the previous lesson. The visual impact of different personalities will be even more striking with professional message bubbles and markdown rendering!
+
+## What are System Prompts?
+
+System Prompts act like persistent instructions or "character notes" for an LLM. Unlike user prompts (which change each turn), a system prompt guides overall behavior of the LLM when it is generating responses. Your system prompt will:
+
+*   **Defines Persona:** Sets tone (e.g., formal, casual, witty, brand voice).
+*   **Set Constraints:** Instructs AI on boundaries (e.g., "Do not offer financial advice", "Only discuss product features").
+*   **Provide Core System Context:** Gives background relevant to all interactions (e.g., "You are a helpful assistant for Vercel products").
+
+Your system prompts control how the LLM responds to _every_ prompt in a conversation, separate from _what the user_ asks with their prompts throughout a conversation. The system prompt is essential for branding, safety, and consistent bot behavior.
+
+![System prompts](/assets/aisdk-system-prompts.png)
+
+## Implementation: The **`system`** Property
+
+Let's modify our existing API route to add personality. Open `app/api/chat/route.ts` and add a `system` property to your `streamText` call:
+
+```typescript
+app/api/chat/route.ts
+
+import { streamText, convertToModelMessages } from 'ai';
+
+export const maxDuration = 30;
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const result = streamText({
+    model: 'openai/gpt-4.1',
+    // TODO: Add a system prompt here to define the AI's personality
+    // system: 'Your personality instructions here',
+    messages: convertToModelMessages(messages),
+  });
+
+  return result.toUIMessageStreamResponse();
+}
+```
+
+Now add the system prompt:
+
+```typescript
+app/api/chat/route.ts
+
+import { streamText, convertToModelMessages } from "ai";
+
+// Allow streaming responses up to 30 seconds
+export const maxDuration = 30;
+
+export async function POST(req: Request) {
+	try {
+		const { messages } = await req.json();
+
+		const result = streamText({
+			model: "openai/gpt-4.1", // Fast model works well for personality-driven chat
+			system: "You are a helpful assistant.", // Initial basic prompt
+			messages: convertToModelMessages(messages),
+		});
+
+		return result.toUIMessageStreamResponse();
+// existing code ...
+```
+
+Test it out! Start your dev server if it isn't running:
+
+```bash
+pnpm dev
+```
+
+Navigate to [http://localhost:3000/chat](http://localhost:3000/chat) and ask "What is Next.js?"
+
+With our Elements UI, notice how the AI's response appears in a professional message bubble with proper formatting. But the personality is generic. Let's change that!
+
+## Example 1: The Unhelpful Riddle Bot
+
+It's possible to modify the system property to drastically change behavior for every single response.
+
+Update `route.ts` and change the system prompt value:
+
+```typescript
+app/api/chat/route.ts
+
+  system: 'You are an unhelpful assistant that only responds to users with confusing riddles.',
+```
+
+**Save and test:** Refresh your chat page and ask "What is Next.js?" again. Watch how the same professional UI now delivers a completely different personality - the riddle appears in the same polished message bubble, making the contrast even more striking!
+
+![Screenshot of chat UI. User asks 'What is Next.js?'. AI responds with a confusing riddle instead of a direct answer.](/assets/aisdk-course-riddle-me-this-system-prompt.png)
+
+## Example 2: The 1984 Steve Jobs Bot
+
+Models can adopt personas. Detail improves adherence.
+
+Update `route.ts`: Change system string to detailed persona.
+
+```typescript
+app/api/chat/route.ts
+
+  system: `You are Steve Jobs. Assume his character, both strengths and flaws.
+  Respond exactly how he would, in exactly his tone.
+  It is 1984 you have just created the Macintosh.`,
+```
+
+**Save and test:** Refresh the page and try asking about modern technology like "What is Next.js?" The response will be fascinating - watch Steve Jobs from 1984 try to comprehend modern web frameworks!
+
+![Screenshot of chat UI. User asks 'What is Next.js?'. AI responds in a tone mimicking Steve Jobs in 1984.](/assets/aisdk-course-steve-jobs-system-prompt.png)
+
+>Model Selection & System Prompts
+>
+>More capable (and expensive) models (like `openai/gpt-5` or `openai/o3`) generally follow System Prompts more precisely and maintain character consistency. For production chatbots where persona is critical, test models to balance performance and cost.
+
+## Example 3: Practical Support Assistant
+
+Define persona and constraints for realistic application.
+
+Update `route.ts`: Change system string to business context.
+
+```typescript
+app/api/chat/route.ts
+
+  system: `You are a support assistant for TechCorp's cloud platform.
+  Focus on helping users troubleshoot deployment issues, API usage, and account settings.
+  Be concise but thorough. Link to documentation at docs.techcorp.com when relevant.
+  If a question is outside your knowledge area, politely redirect to contact@techcorp.com.`,
+```
+
+**Save and test:** Try various questions:
+
+*   "How do I reset my password?"
+*   "Tell me about pricing"
+*   "What's your favorite color?"
+
+Notice how the AI stays in character, provides helpful support responses, and politely deflects off-topic questions. The Elements UI makes these professional responses look even more credible!
+
+>System Prompt Length
+>
+>While detailed System Prompts improve behavior, very long prompts consume context window space, potentially affecting performance or cost. Keep prompts concise yet clear for production.
+
+## Key Takeaways
+
+System prompts transform your chatbot from a generic assistant into a unique personality:
+
+*   **The `system` property** in `streamText` sets persistent behavioral rules
+*   **Personas stick** - The AI maintains character across the entire conversation
+*   **Details matter** - More specific prompts lead to better adherence
+*   **Elements amplifies impact** - Professional UI makes personality changes more striking
+
+>💡 Crafting Effective System Prompts
+>
+>Struggling to balance personality with constraints? Try asking an AI assistant:
+>
+>```
+><context>
+>I'm building a chatbot using Vercel AI SDK with streamText and system prompts.
+>I need to define a system prompt that gives the AI a clear personality while maintaining appropriate boundaries.
+>My chatbot will be used for: [describe your specific use case]
+></context>
+>
+><use-case>
+>Type: Customer support chatbot for a SaaS product (project management tool)
+>Target audience: Small business owners and team leads
+>Tone desired: Friendly but professional, helpful without being overly casual
+>Key constraints:
+>- Should not make promises about features or timelines
+>- Must redirect billing/account issues to support email
+>- Should stay on-topic (product features, usage help, >troubleshooting)
+></use-case>
+>
+><current-attempt>
+>system: "You are a helpful support assistant for ProjectFlow, a project management tool. Help users with features and troubleshooting. Be friendly."
+></current-attempt>
+>
+><problems>
+>1. **Too generic:** The AI sometimes goes off-topic (e.g., answering general project management theory instead of focusing on our tool)
+>2. **Lacks boundaries:** When asked about pricing changes, the AI makes up information instead of redirecting
+>3. **Inconsistent tone:** Sometimes overly formal, sometimes too casual
+>4. **No examples:** The AI doesn't know what kind of help to prioritize
+></problems>
+>
+><questions>
+>1. How detailed should my system prompt be? Is 2-3 sentences enough or should it be longer?
+>2. Should I use examples in the system prompt to show the desired behavior?
+>3. How do I phrase constraints so the AI gracefully deflects instead of saying "I can't help with that"?
+>4. What's the best way to define tone? Specific adjectives vs example phrases?
+>5. Should I mention what the AI *should* do or what it *shouldn't* do (or both)?
+></questions>
+>
+><desired-improvements>
+>I want the AI to:
+>- Focus exclusively on our product's features and usage
+>- Redirect billing/account questions to support@projectflow.com
+>- Sound like a knowledgeable teammate, not a corporate robot
+>- Provide actionable steps, not just general advice
+>- Maintain consistent personality across the entire conversation
+>
+>Draft an improved system prompt (100-200 words) that addresses these problems, then explain your design choices.
+></desired-improvements>
+>```
+
+## What's Next?
+
+Your chatbot now has personality, but it's still limited to conversation. In the next lesson, we'll give it **superpowers** by adding tool calling - letting it fetch real data, perform calculations, and interact with external APIs.
+
+Imagine your Steve Jobs bot being able to actually look up modern technology, or your support assistant actually checking account statuses!

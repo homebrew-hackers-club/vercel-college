@@ -1,0 +1,357 @@
+---
+title: Text Classification
+---
+
+Now that you understand why Invisible AI matters you'll put it in practice with **Classification** - turning messy unstructured text into clean, categorized data. You will use the AI SDK's `generateObject` with Zod schemas to classify unstructured text into predefined categories.
+
+>Project Context
+>>Continuing with the same codebase from **AI SDK Dev Setup**. For this section, you'll find the classification example files in the `app/(2-classification)/` directory.
+
+## The Problem: Data Chaos
+
+Imagine getting flooded with user feedback, support tickets, or GitHub issues. It's a goldmine of information, but it's a messy constant firehose! Manually reading and categorizing everything is slow, tedious, and doesn't scale.
+
+*   **Support Tickets:** Is it a billing question? A bug report? A feature request?
+*   **User Feedback:** Positive? Negative? A specific feature suggestion?
+*   **GitHub Issues:** Bug? Feature? Docs issue? Needs triage?
+
+This is where using LLMs to classify shines. We can teach an LLM our desired categories and have it automatically sort incoming text.
+
+## generateText vs generateObject
+
+![Versus diagram](/assets/aisdk-generate-vs.png)
+
+Take a look at the `support_requests.json` file from our project (`app/(2-classification)/support_requests.json`). It contains typical user messages like:
+
+
+```json
+app/(2-classification)/support\_requests.json
+
+[
+  {
+    "id": 1,
+    "text": "I'm having trouble logging into my account. Can you please assist?",
+  },
+  {
+    "id": 2,
+    "text": "The export feature isn't working correctly. Is there a known issue?",
+  },
+  // ... more requests
+];
+```
+
+Our goal is to automatically assign a category (like _account issues or product issues_) to each request.
+
+## The Solution: `generateObject`
+
+In the last lesson we used `generateObject` to generate structured data from information provided in our prompt. It's perfect for this because that's exactly what we want: structured output. Specifically, we want each request paired with its category.
+
+To make this work reliably, we need to tell the LLM exactly what we want to generate. That's where Zod comes in.
+
+[Zod](https://zod.dev/) is a TypeScript schema definitions and validation library that gives you a powerful and relatively simple way to provide the LLM with the shape of data that is expected in its output. It's like TypeScript types, but with runtime validation - perfect for ensuring AI outputs match your expectations.
+
+Here's a short example of a Zod schema:
+
+```typescript
+const exampleSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+});
+```
+
+This schema describes the shape of a name object and the type of data expected for its properties. Zod provides many different data types and structures as well as the ability to define custom types.
+
+With Zod you can define a schema that includes the request text and the available categories.
+
+## Step 1: Define the Schema with `z.enum`
+
+Open `app/(2-classification)/classification.ts`. The file already has imports set up and TODOs to guide you.
+
+The first step is to define our categories and the structure we want for each classified item using Zod. The `z.enum()` function is ideal for defining a fixed set of possible categories.
+
+Replace the first TODO with this schema definition:
+
+```typescript
+app/(2-classification)/classification.ts
+
+// Define the schema for a single classified request
+const classificationSchema = z.object({
+  request: z.string().describe('The original support request text.'),
+  category: z
+    .enum([
+      'billing',
+      'product_issues',
+      'enterprise_sales',
+      'account_issues',
+      'product_feedback',
+    ])
+    .describe('The most relevant category for the support request.'),
+});
+```
+
+Now replace the remaining TODOs with the generateObject implementation:
+
+```typescript
+// Use generateObject to get structured output
+const { object: classifiedRequests } = await generateObject({
+  model: 'openai/gpt-4.1', // Fast model ideal for classification tasks (low cost, immediate response)
+                            // For nuanced edge cases, consider 'openai/gpt-5' (reasoning model)
+  // Prompt combines instruction + stringified data
+  prompt: `Classify the following support requests based on the defined categories.\n\n${JSON.stringify(supportRequests)}`,
+  // Our Zod schema defines the structure for each item
+  schema: classificationSchema,
+  // Crucial: Tell the SDK we expect an array of these objects
+  output: 'array',
+});
+
+console.log('\n--- AI Response (Structured JSON) ---');
+// Output the validated, structured array
+console.log(JSON.stringify(classifiedRequests, null, 2));
+console.log('-----------------------------------');
+```
+
+Code Breakdown:
+
+*   **Imports**: Standard imports for `generateObject`, `Zod`, and our JSON data.
+*   **Schema**: Defines the structure for one classified item using `z.object` and `z.enum`.
+*   **Prompt**: Clear instructions plus the raw data for context.
+*   **generateObject Call**: Uses `model`, `prompt`, `schema`, and importantly, `output: 'array'`.
+*   **Output**: Accesses the validated array via `result.object`.
+
+## Step 2: Run the Script
+
+Time to see it in action! In your terminal (project root):
+
+```bash
+pnpm classification
+```
+
+You should get a clean JSON array like this:
+
+```json
+// Terminal Output (Example)
+[
+  {
+    "request":
+      "I'm having trouble logging into my account. Can you please assist?",
+    "category": "account_issues",
+  },
+  {
+    "request":
+      "The export feature isn't working correctly. Is there a known issue?",
+    "category": "product_issues",
+  },
+  {
+    "request": "I need help integrating your API with our existing system.",
+    "category": "product_issues", // Note: Model might choose this or another category
+  },
+  // ... other requests classified ...
+];
+```
+
+Success! Structured, usable data instead of messy text. Now you can route billing questions to finance, bugs to engineering, and feature requests to product automatically.
+
+That's classification power.
+
+## Step 3: Iteration 1 — Adding Urgency
+
+Let's make this even more useful. What if we wanted the AI to estimate the urgency of each request? Easy! Just add it to the schema:
+
+```typescript
+app/(2-classification)/classification.ts
+
+// Update the schema definition
+const classificationSchema = z.object({
+	request: z.string().describe('The original support request text.'),
+	category: z
+		.enum(['billing', 'product_issues', 'enterprise_sales', 'account_issues', 'product_feedback'])
+		.describe('The most relevant category for the support request.'),
+    urgency: z
+		.enum(['low', 'medium', 'high'])
+    .describe('The probable urgency of the support request.'),
+})
+
+// ... rest of the main function remains the same ...
+```
+
+Run `pnpm classification` again. You'll now see the urgency field added to each object, with the AI making its best guess (e.g., "high" for API integration help, "medium" for the export feature issue).
+
+## Step 4: Iteration 2 — Handling Multi-Language & Refining with `.describe()`
+
+Now, let's throw a curveball: `support_requests_multilanguage.json`. This file has requests in Spanish, German, Chinese, etc.
+
+Can your setup handle it?
+
+### Challenge:
+
+Modify `classification.ts`:
+
+```typescript
+app/(2-classification)/classification.ts
+
+import supportRequests from './support_requests_multilanguage.json';
+import { z } from 'zod';
+import { generateObject } from 'ai';
+
+// Define the schema for a single classified request
+const classificationSchema = z.object({
+  request: z.string().describe('The original support request text.'),
+  category: z
+    .enum([
+      'billing',
+      'product_issues',
+      'enterprise_sales',
+      'account_issues',
+      'product_feedback',
+    ])
+    .describe('The most relevant category for the support request.'),
+  urgency: z
+    .enum(['low', 'medium', 'high'])
+    .describe('The probable urgency of the support request.'),
+  language: z.string(),
+});
+
+// ... rest of the main function remains the same ...
+```
+
+*   Change the import: `import supportRequests from './support_requests_multilanguage.json';`
+*   Add `language: z.string()` to the classificationSchema.
+*   Run `pnpm classification`.
+
+You'll see the AI detects the languages, but maybe gives you codes ("ES"). We want full names ("Spanish"). This requires more instructions to make it precise. You might think to update the prompt itself, but we are going to update the schema to better indicate what data is expected.
+
+Solution: Use `.describe()` to prompt the model for exactly what you want for any specific key!
+
+Update the language field in your schema to include a description of what is expected in the field:
+
+```typescript
+// Inside classificationSchema
+  language: z.string().describe("The full name of the language the support request is in (e.g., English, Spanish, German)."),
+```
+
+Run the script one more time. You should now see full language names. Clean, full language names, thanks to our more specific schema instructions.
+
+> What if the AI gets it wrong?
+>* The AI SDK uses your Zod schema to _validate_ the LLM's output. If the model returns a category not in your `z.enum` list (e.g., "sales\_inquiry" instead of "enterprise\_sales") or fails other schema rules, `generateObject` will throw a validation error. This prevents unexpected data structures from breaking your application. You might need to refine your prompt, schema descriptions, or use a more capable model if validation fails often.
+
+Iteration is the name of the game. Add fields to your schema incrementally. Use `.describe()` to fine-tune the output for specific fields when the default isn't perfect. This schema-driven approach keeps your AI interactions predictable and robust.
+
+As you build more sophisticated classification systems, you'll encounter edge cases and ambiguous inputs. The next callout provides a structured approach to refining your schemas when basic descriptions aren't enough.
+
+> 💡 Refining Classification Accuracy
+
+* Getting inconsistent or ambiguous categories? Try asking an AI assistant to help refine your approach:
+
+```
+<context>
+I'm building a support ticket classification system using Vercel AI SDK's generateObject with Zod schemas.
+My system classifies requests into categories: billing, product_issues, enterprise_sales, account_issues, product_feedback.
+I've added multi-language support and urgency detection.
+</context>
+
+<current-implementation>
+const classificationSchema = z.object({
+  request: z.string().describe('The original support request text.'),
+  category: z.enum(['billing', 'product_issues', 'enterprise_sales', 'account_issues', 'product_feedback'])
+    .describe('The most relevant category for the support request.'),
+  urgency: z.enum(['low', 'medium', 'high'])
+    .describe('The probable urgency of the support request.'),
+  language: z.string().describe("The full name of the language (e.g., English, Spanish, German)."),
+});
+</current-implementation>
+
+<problem>
+I'm seeing inconsistent results where:
+1. Some ambiguous requests get categorized differently on repeated runs
+2. Urgency detection seems overly cautious (marking everything as "medium")
+3. Edge cases like billing issues that affect product access are unclear
+
+How can I improve my schema and prompt to get more consistent, accurate classifications?
+</problem>
+
+<specific-questions>
+1. Should I add confidence scoring to help identify ambiguous cases?
+2. How can I use `.describe()` more effectively to guide urgency detection?
+3. For edge cases spanning multiple categories, should I switch to multi-label classification?
+
+Provide specific schema improvements and `.describe()` examples that address each issue.
+</specific-questions>
+```
+
+## Step 4: Enhancing the UI
+
+### Multi-Label Classification Challenge 
+
+Real-world support requests often belong to multiple categories simultaneously.
+
+**Try these steps:**
+
+1. Modify the current schema to allow for multiple categories per request
+2. Change: category: z.enum(['billing', ...]) to categories: z.array(z.enum(['billing', ...]))
+3. Update the prompt to instruct the model to assign multiple categories when appropriate
+4. Test with ambiguous requests that span multiple categories (e.g., 'I can't access my premium features after my payment went through')
+
+**Challenge:**
+
+How does the model's accuracy change with multi-label classification? Does it tend to assign too many or too few categories? How might you optimize the prompt for better multi-label results?
+
+### Real-time Moderation System
+
+Build a streaming moderation pipeline that classifies, scores, and routes messages at enterprise scale.
+
+**Try these steps:**
+
+1. Create an API route at app/api/moderation/route.ts with streaming support for real-time processing.
+2. Use generateObject with schema from lesson to classify language + severity (see Generating Structured Data).
+3. Route flagged content to alerts (console.error for now); aggregate metrics via Telemetry.
+4. Internationalize by auto-detecting language and passing locale to prompts.
+5. Test with concurrent requests to ensure low latency responses.
+
+**Challenge:**
+
+Add Redis caching for repeated messages and implement rate limiting middleware.
+
+```typescript
+export async function handleMessage(message: string) {
+  // TODO: classify, score, and route message
+  const { object: classification } = await generateObject({
+    model: 'openai/gpt-4.1',
+    schema: z.object({
+      severity: z.enum(['safe', 'warning', 'critical']),
+      categories: z.array(z.enum(['spam', 'violence', 'pii', 'other'])),
+      confidence: z.number().min(0).max(1)
+    }),
+    prompt: `Classify this message: "${message}"`
+  });
+
+  // Route based on severity
+  if (classification.severity === 'critical') {
+    await sendAlert(message, classification);
+  }
+
+  return classification;
+}
+```
+
+## Further Reading (Optional)
+
+Enhance your schema-validation skills with these resources:
+
+*   [Zod Documentation](https://zod.dev/)  
+    Complete reference covering parsing, transforms, custom refinements, and error handling.
+*   [Advanced Schema Validation Patterns](https://github.com/colinhacks/zod#schema-methods)  
+    Cookbook-style examples for preprocessors, unions, discriminated unions, and more.
+
+## Key Takeaways
+
+*   Classification uses AI to assign predefined categories to text.
+*   generateObject with a Zod schema is the core AI SDK tool for this.
+*   Use `z.enum([...categories])` to define your classification labels.
+*   Specify `output: 'array'` to classify multiple items at once.
+*   Use `.describe()` on schema fields to guide the model's output format (like getting full language names).
+
+This technique can be used to automate workflows like ticket routing, content moderation, and feedback analysis.
+
+## Up Next: Summarization Essentials
+
+You've successfully used `generateObject` to classify text. Now, let's apply similar techniques to another powerful Invisible AI feature: summarization. In the next lesson you'll build a tool that creates concise summaries from longer text inputs, helping users quickly grasp key information. We'll also touch on displaying this neatly in your user interface (UI).
