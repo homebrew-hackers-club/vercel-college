@@ -10,7 +10,8 @@ We'll begin with the core architecture that powers every AI chat interface:
 *   Implement the frontend with `useChat`.
 
 > Project Context
->* We're working in `app/(5-chatbot)/` directory. Same project setup as before, but now we're building both server and client sides.
+>
+> We're working in `app/(5-chatbot)/` directory. Same project setup as before, but now we're building both server and client sides.
 
 ## Chatbot Architecture Overview
 
@@ -25,7 +26,8 @@ The frontend is what the user interacts with in the browser. It's the UI.
 First, create the API endpoint that will handle chat requests from your frontend.
 
 > What are Next.js Route Handlers?
-> * [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers) are serverless endpoints in your Next.js app. They can live anywhere in the `app/` directory (not just `/api/`), though we'll use the `/api/` convention here. No separate backend needed - perfect for AI functionality.
+>
+> [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers) are serverless endpoints in your Next.js app. They can live anywhere in the `app/` directory (not just `/api/`), though we'll use the `/api/` convention here. No separate backend needed - perfect for AI functionality.
 
 1.  **Create the file:** `app/api/chat/route.ts`
     
@@ -161,7 +163,8 @@ export default function Chat() {
 ```
 
 > Default API Endpoint
->* The `useChat` hook automatically uses `/api/chat` as its endpoint. If you need a different endpoint or custom transport behavior, check out the [transport documentation](https://ai-sdk.dev/docs/ai-sdk-ui/transport).
+>
+> The `useChat` hook automatically uses `/api/chat` as its endpoint. If you need a different endpoint or custom transport behavior, check out the [transport documentation](https://ai-sdk.dev/docs/ai-sdk-ui/transport).
 
 3.  **Add the input form:**
 
@@ -262,7 +265,8 @@ Before moving on, test these scenarios to understand why we need better tooling:
 These aren't bugs - they're missing features that every chat interface needs.
 
 > Model Choice for Streaming
->* We use `openai/gpt-4.1` for fast, visible streaming responses. Unlike reasoning models like `openai/gpt-5-mini` (which think for 10-15 seconds before streaming), `gpt-4.1` starts streaming immediately for a responsive user experience. Swap out the model in the `streamText` call to `openai/gpt-5-mini` to see the difference.
+>
+> We use `openai/gpt-4.1` for fast, visible streaming responses. Unlike reasoning models like `openai/gpt-5-mini` (which think for 10-15 seconds before streaming), `gpt-4.1` starts streaming immediately for a responsive user experience. Swap out the model in the `streamText` call to `openai/gpt-5-mini` to see the difference.
 
 ## What you've built so far:
 

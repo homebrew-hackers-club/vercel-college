@@ -21,13 +21,14 @@ Manually parsing that input is a nightmare. Regex breaks easily, and complex par
 <Woz title="Appointment Extraction Example"
 description="See how AI extracts structured appointment details from natural language"
 prompt={`Extract appointment details from: "Team meeting with Lee and James next Monday at 10am in the conference room to discuss the Q3 roadmap. Use this schema to answer: 
+
 z.object({
-title: z.string().describe('The title of the event. Should be the main purpose, without names.'),
-startTime: z.string().nullable().describe('Appointment start time in HH:MM format (e.g., 14:00 for 2pm).'),
-endTime: z.string().nullable(),
-attendees: z.array(z.string()).nullable().describe('List of attendee names.'),
-location: z.string().nullable(),
-date: z.string().describe('The date of the appointment in YYYY-MM-DD format.')
+ title: z.string().describe('The title of the event. Should be the main purpose, without names.'),
+ startTime: z.string().nullable().describe('Appointment start time in HH:MM format (e.g., 14:00 for 2pm).'),
+ endTime: z.string().nullable(),
+ attendees: z.array(z.string()).nullable().describe('List of attendee names.'),
+ location: z.string().nullable(),
+ date: z.string().describe('The date of the appointment in YYYY-MM-DD format.')
 })"`}/>
 
 ## Setup: The Appointment Extractor App
@@ -310,7 +311,9 @@ Save `schemas.ts`, refresh the browser, and test again with the same input. The 
 ![Screenshot of the '/extraction' page showing the refined extraction results](/assets/aisdk-course-extraction-refined.png)
 
 > 💡 Handling Relative Dates and Time Formats
->>Struggling with date parsing or time format inconsistencies? Try asking an AI assistant:
+>
+>Struggling with date parsing or time format inconsistencies? Try asking an AI assistant:
+>
 >```
 ><context>
 >I'm building an appointment extraction feature using Vercel AI SDK's generateObject with Zod schemas.

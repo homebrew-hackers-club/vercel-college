@@ -232,51 +232,52 @@ Update the language field in your schema to include a description of what is exp
 Run the script one more time. You should now see full language names. Clean, full language names, thanks to our more specific schema instructions.
 
 > What if the AI gets it wrong?
->* The AI SDK uses your Zod schema to _validate_ the LLM's output. If the model returns a category not in your `z.enum` list (e.g., "sales\_inquiry" instead of "enterprise\_sales") or fails other schema rules, `generateObject` will throw a validation error. This prevents unexpected data structures from breaking your application. You might need to refine your prompt, schema descriptions, or use a more capable model if validation fails often.
+>
+> The AI SDK uses your Zod schema to _validate_ the LLM's output. If the model returns a category not in your `z.enum` list (e.g., "sales\_inquiry" instead of "enterprise\_sales") or fails other schema rules, `generateObject` will throw a validation error. This prevents unexpected data structures from breaking your application. You might need to refine your prompt, schema descriptions, or use a more capable model if validation fails often.
 
 Iteration is the name of the game. Add fields to your schema incrementally. Use `.describe()` to fine-tune the output for specific fields when the default isn't perfect. This schema-driven approach keeps your AI interactions predictable and robust.
 
 As you build more sophisticated classification systems, you'll encounter edge cases and ambiguous inputs. The next callout provides a structured approach to refining your schemas when basic descriptions aren't enough.
 
 > 💡 Refining Classification Accuracy
-
-* Getting inconsistent or ambiguous categories? Try asking an AI assistant to help refine your approach:
-
-```
-<context>
-I'm building a support ticket classification system using Vercel AI SDK's generateObject with Zod schemas.
-My system classifies requests into categories: billing, product_issues, enterprise_sales, account_issues, product_feedback.
-I've added multi-language support and urgency detection.
-</context>
-
-<current-implementation>
-const classificationSchema = z.object({
-  request: z.string().describe('The original support request text.'),
-  category: z.enum(['billing', 'product_issues', 'enterprise_sales', 'account_issues', 'product_feedback'])
-    .describe('The most relevant category for the support request.'),
-  urgency: z.enum(['low', 'medium', 'high'])
-    .describe('The probable urgency of the support request.'),
-  language: z.string().describe("The full name of the language (e.g., English, Spanish, German)."),
-});
-</current-implementation>
-
-<problem>
-I'm seeing inconsistent results where:
-1. Some ambiguous requests get categorized differently on repeated runs
-2. Urgency detection seems overly cautious (marking everything as "medium")
-3. Edge cases like billing issues that affect product access are unclear
-
-How can I improve my schema and prompt to get more consistent, accurate classifications?
-</problem>
-
-<specific-questions>
-1. Should I add confidence scoring to help identify ambiguous cases?
-2. How can I use `.describe()` more effectively to guide urgency detection?
-3. For edge cases spanning multiple categories, should I switch to multi-label classification?
-
-Provide specific schema improvements and `.describe()` examples that address each issue.
-</specific-questions>
-```
+>
+>Getting inconsistent or ambiguous categories? Try asking an AI assistant to help refine your approach:
+>
+>```
+><context>
+>I'm building a support ticket classification system using Vercel AI SDK's generateObject with Zod schemas.
+>My system classifies requests into categories: billing, product_issues, enterprise_sales, account_issues, product_feedback.
+>I've added multi-language support and urgency detection.
+></context>
+>
+><current-implementation>
+>const classificationSchema = z.object({
+>  request: z.string().describe('The original support request text.'),
+>  category: z.enum(['billing', 'product_issues', 'enterprise_sales', 'account_issues', 'product_feedback'])
+>    .describe('The most relevant category for the support request.'),
+>  urgency: z.enum(['low', 'medium', 'high'])
+>    .describe('The probable urgency of the support request.'),
+>  language: z.string().describe("The full name of the language (e.g., English, Spanish, German)."),
+>});
+></current-implementation>
+>
+><problem>
+>I'm seeing inconsistent results where:
+>1. Some ambiguous requests get categorized differently on repeated runs
+>2. Urgency detection seems overly cautious (marking everything as "medium")
+>3. Edge cases like billing issues that affect product access are unclear
+>
+>How can I improve my schema and prompt to get more consistent, accurate classifications?
+></problem>
+>
+><specific-questions>
+>1. Should I add confidence scoring to help identify ambiguous cases?
+>2. How can I use `.describe()` more effectively to guide urgency detection?
+>3. For edge cases spanning multiple categories, should I switch to multi-label classification?
+>
+>Provide specific schema improvements and `.describe()` examples that address each issue.
+></specific-questions>
+>```
 
 ## Step 4: Enhancing the UI
 

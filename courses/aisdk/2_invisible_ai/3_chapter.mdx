@@ -22,7 +22,7 @@ Charlie: The redesign will take about 2 weeks. Can marketing wait that long?
 Alice: Yes, they said end of month is fine. Let's also add analytics tracking.
 Bob: Good call. I'll set up the tracking events today.
 Charlie: I'll create the design mockups by Friday for review.
-`}>
+`}/>
 
 ## Setup: The Comment Thread App
 
@@ -44,7 +44,8 @@ You'll see a simple page displaying a list of comments (loaded from `messages.js
 We'll use a Next.js Server Action to handle the AI call.
 
 > What are Server Actions?
-> * Next.js Server Actions let you run secure server-side code directly from your React components without manually creating API routes. They're perfect for AI features because they keep your API keys and sensitive logic on the server while providing a seamless developer experience for calling backend functions from the frontend. Learn more about [Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations).
+>
+> Next.js Server Actions let you run secure server-side code directly from your React components without manually creating API routes. They're perfect for AI features because they keep your API keys and sensitive logic on the server while providing a seamless developer experience for calling backend functions from the frontend. Learn more about [Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations).
 
 1.  **Create `` `actions.ts` ``:** Inside the `app/(3-summarization)/summarization/` directory, create a new file named `actions.ts`.
     
@@ -225,7 +226,8 @@ Key changes to the schema code:
 *   Provided specific guidance on length and content focus (e.g., "Include names").
 
 > Performance Note
->* Summarizing very long conversations can take time and might hit model context limits or timeouts. For production apps with extensive text, consider techniques like chunking the input or using models with larger context windows.
+>
+> Summarizing very long conversations can take time and might hit model context limits or timeouts. For production apps with extensive text, consider techniques like chunking the input or using models with larger context windows.
 
 Save `actions.ts`, refresh the browser page, and click "Summarize" again. The output should now be much cleaner and follow your instructions more closely, especially the takeaways with assigned names!
 
