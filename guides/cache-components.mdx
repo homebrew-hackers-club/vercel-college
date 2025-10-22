@@ -10,10 +10,7 @@ cacheComponents is a new configuration flag introduced in Next.js 16 that change
 
 In simple terms:
 
-When cacheComponents is enabled, Next.js stops pre-rendering data for your Server Components by default.
-Everything runs fresh at runtime, unless you explicitly mark it to be cached (using the use cache directive or related APIs).
-
-Think of it as switching your app from "static-first" to "dynamic-first" rendering behavior.
+With `cacheComponents` enabled, pages are dynamic by default. Next.js can still pre-render a static shell and stream dynamic parts with Suspense; you opt into caching explicitly with `use cache` and related APIs where it helps. See the official guide: [Next.js Cache Components](https://nextjs.org/docs/app/getting-started/cache-components).
 
 <Woz
 title='Quick Check'
@@ -35,7 +32,77 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-This turns on runtime-fetching mode for all Server Components.
+With Cache Components, pages are dynamic by default; opt into caching with `use cache` and `cacheLife` where appropriate ([docs](https://nextjs.org/docs/app/getting-started/cache-components)).
+
+## 🔁 Effect on route segment config
+
+When `cacheComponents` is enabled, several route segment options change behavior. Migrate as follows ([docs](https://nextjs.org/docs/app/getting-started/cache-components)):
+
+- **dynamic = "force-dynamic"**: Not needed. Pages are dynamic by default.
+
+```tsx
+// Before
+export const dynamic = 'force-dynamic'
+
+export default function Page() {
+  return <div>...</div>
+}
+```
+
+```tsx
+// After (remove it)
+export default function Page() {
+  return <div>...</div>
+}
+```
+
+- **dynamic = "force-static"**: Replace with `use cache` in each layout/page for that route.
+
+```tsx
+// Before
+export const dynamic = 'force-static'
+
+export default async function Page() {
+  const data = await fetch('https://api.example.com/data')
+  return <div>...</div>
+}
+```
+
+```tsx
+// After
+import { cacheLife } from 'next/cache'
+
+export default async function Page() {
+  'use cache'
+  cacheLife('minutes')
+  const data = await fetch('https://api.example.com/data')
+  return <div>...</div>
+}
+```
+
+- **revalidate**: Replace with `cacheLife` inside the cached scope.
+
+```tsx
+// Before
+export const revalidate = 3600
+
+export default function Page() {
+  return <div>...</div>
+}
+```
+
+```tsx
+// After
+import { cacheLife } from 'next/cache'
+
+export default function Page() {
+  'use cache'
+  cacheLife('hours')
+  return <div>...</div>
+}
+```
+
+- **fetchCache**: Not needed. Inside a `use cache` scope, server I/O and `fetch` are cached according to the cache boundary.
 
 ## 💡 Why it exists
 
@@ -56,21 +123,9 @@ description='Understanding the paradigm shift'
 prompt='Why do you think this "philosophical shift" matters for different types of applications? Compare static sites vs dynamic apps.'
 />
 
-## 🧩 How it works internally
+## 🧩 How it works conceptually
 
-When cacheComponents is enabled, Next.js internally toggles three subsystems:
-
-| Flag | Description |
-|------|-------------|
-| `ppr` | Partial prerendering — controls how pages are streamed and revalidated. |
-| `useCache` | Determines if component-level cache boundaries are respected. |
-| `dynamicIO` | Enables fully dynamic reads/writes for runtime data fetching. |
-
-All three are unified under this one flag. So when you enable cacheComponents, you're essentially opting into Next.js's new dynamic caching model.
-
-<Woz
-prompt='Can you draw a simple diagram showing how these three subsystems (ppr, useCache, dynamicIO) work together under cacheComponents?'
-/>
+Cache Components implements Partial Prerendering (PPR) and introduces explicit cache boundaries with the `use cache` directive. The static shell can be pre-rendered while dynamic parts stream within Suspense boundaries ([docs](https://nextjs.org/docs/app/getting-started/cache-components)).
 
 ## 🧱 Behavior overview
 
@@ -118,6 +173,7 @@ cacheComponents works hand-in-hand with several other caching primitives:
 | `cacheLife()` | Defines the lifespan (TTL) of cached data. |
 | `cacheTag()` | Tags cached data for selective revalidation. |
 | `revalidateTag()` | Triggers cache invalidation by tag. |
+| `updateTag()` | Marks a tag as updated to invalidate cached entries. |
 | `revalidatePath()` | Revalidates a specific route's cache entries. |
 
 With `cacheComponents: true`, these APIs are no longer optional — they become core primitives for controlling data persistence.
@@ -199,18 +255,13 @@ prompt='Walk me through a real-world scenario where you would choose cacheCompon
 
 ## 🧬 How it interacts with ISR & PPR
 
-ISR (Incremental Static Regeneration) still works — you just need to reintroduce caching using `use cache` and `cacheLife`.
-
-PPR (Partial Prerendering) becomes dynamic by default — components will be rendered at runtime unless explicitly cached.
-
-So with cacheComponents, ISR and PPR are opt-in, not opt-out.
+ISR still works — opt into caching with `use cache` and set duration with `cacheLife`. Cache Components implements PPR: the static shell can be pre-rendered while dynamic parts stream via Suspense. Use Suspense boundaries to control where streaming occurs. With Cache Components, caching and regeneration are opt-in at the function/component level ([docs](https://nextjs.org/docs/app/getting-started/cache-components)).
 
 ## 🧩 Debugging & Observability
 
 To verify how components are being cached:
 
 - Run your app in development mode (`pnpm dev` or `npm run dev`).
-- Use the Next.js overlay → "Cache Info" tab (coming soon).
 - Log or inspect requests with `console.log('cache hit/miss')`.
 - Observe server logs for "rendered dynamically" messages.
 
@@ -241,11 +292,6 @@ If you're upgrading to Next.js 16:
 | Always live data | `cacheComponents: true` |
 | Cached data by default | Default (no flag) |
 | Mix of both | Enable cacheComponents and mark selected parts with `use cache` |
-
-## 🔮 The Future
-
-This flag is part of Next.js's long-term move toward unified runtime rendering — simplifying caching logic across the App Router.
-Eventually, it's likely that the behavior enabled by cacheComponents will become the default.
 
 ## 📝 TL;DR
 
