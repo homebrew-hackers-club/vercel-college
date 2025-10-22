@@ -1,0 +1,264 @@
+---
+title: cacheComponents — Deep Dive Developer Guide
+description: Learn how to use cacheComponents
+---
+
+
+## 🔍 What it is
+
+cacheComponents is a new configuration flag introduced in Next.js 16 that changes how data fetching, caching, and pre-rendering behave inside the App Router.
+
+In simple terms:
+
+When cacheComponents is enabled, Next.js stops pre-rendering data for your Server Components by default.
+Everything runs fresh at runtime, unless you explicitly mark it to be cached (using the use cache directive or related APIs).
+
+Think of it as switching your app from "static-first" to "dynamic-first" rendering behavior.
+
+<Woz
+title='Quick Check'
+description='Do you understand the core concept?'
+prompt='Explain in your own words what cacheComponents does and how it changes Next.js default behavior.'
+/>
+
+## ⚙️ Configuration
+
+To enable it, add the following to your `next.config.ts` (or `.js`):
+
+```typescript
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+	cacheComponents: true,
+};
+
+export default nextConfig;
+```
+
+This turns on runtime-fetching mode for all Server Components.
+
+## 💡 Why it exists
+
+Before cacheComponents, Next.js aggressively cached and pre-rendered most data at build time or request time depending on fetch caching options.
+That worked well for static sites, but for dynamic, real-time applications (dashboards, AI apps, internal tools), this default often caused confusion and stale data issues.
+
+So cacheComponents flips the default behavior:
+
+**Without it:** Components are cached unless you disable it.
+
+**With it:** Components are not cached unless you explicitly enable caching.
+
+It's a major philosophical shift — giving developers full control over when and how caching happens.
+
+<Woz
+title='Philosophy Check'
+description='Understanding the paradigm shift'
+prompt='Why do you think this "philosophical shift" matters for different types of applications? Compare static sites vs dynamic apps.'
+/>
+
+## 🧩 How it works internally
+
+When cacheComponents is enabled, Next.js internally toggles three subsystems:
+
+| Flag | Description |
+|------|-------------|
+| `ppr` | Partial prerendering — controls how pages are streamed and revalidated. |
+| `useCache` | Determines if component-level cache boundaries are respected. |
+| `dynamicIO` | Enables fully dynamic reads/writes for runtime data fetching. |
+
+All three are unified under this one flag. So when you enable cacheComponents, you're essentially opting into Next.js's new dynamic caching model.
+
+<Woz
+prompt='Can you draw a simple diagram showing how these three subsystems (ppr, useCache, dynamicIO) work together under cacheComponents?'
+/>
+
+## 🧱 Behavior overview
+
+Here's what changes in the lifecycle when `cacheComponents: true`:
+
+### 1. Data fetching defaults to dynamic
+
+All `fetch()` calls and Server Component data requests are considered dynamic unless wrapped in a cache directive.
+
+**Example:**
+
+```javascript
+// This will re-fetch on every request
+const res = await fetch('https://api.example.com/data');
+const data = await res.json();
+```
+
+### 2. Caching must be explicit
+
+If you want data to persist across requests, you must wrap it with `use cache`:
+
+```javascript
+'use cache';
+
+export async function getData() {
+	const res = await fetch('https://api.example.com/data');
+	return res.json();
+}
+```
+
+Now, `getData()` will be cached according to your app's cache policy.
+
+### 3. Component trees are dynamically rendered
+
+Components that fetch data are executed on every request.
+This ensures data freshness but can increase TTFB (time-to-first-byte) if your APIs are slow.
+
+## 🧩 Related APIs
+
+cacheComponents works hand-in-hand with several other caching primitives:
+
+| API / Directive | Purpose |
+|-----------------|---------|
+| `use cache` | Marks a component, function, or page as cacheable. |
+| `cacheLife()` | Defines the lifespan (TTL) of cached data. |
+| `cacheTag()` | Tags cached data for selective revalidation. |
+| `revalidateTag()` | Triggers cache invalidation by tag. |
+| `revalidatePath()` | Revalidates a specific route's cache entries. |
+
+With `cacheComponents: true`, these APIs are no longer optional — they become core primitives for controlling data persistence.
+
+## ⚖️ Tradeoffs
+
+### ✅ Pros
+
+- **Always fresh data:** no stale or outdated pre-renders.
+- **Predictable behavior:** runtime fetching feels more "server-like."
+- **Fine-grained control:** use `use cache` and `cacheLife()` for explicit caching.
+- **Ideal for real-time or authenticated apps.**
+
+### ❌ Cons
+
+- **Increased latency:** runtime fetching means slower TTFB if network-bound.
+- **Higher server cost:** more frequent data fetching and computation.
+- **Requires explicit caching setup:** you must consciously manage cache boundaries.
+
+## 🚀 When to use it
+
+Use cacheComponents when your app fits one or more of these profiles:
+
+| Use Case | Why it helps |
+|----------|--------------|
+| Dashboards / Admin Panels | Always show live data; avoid stale API responses. |
+| AI Applications | Model responses or content updates frequently. |
+| Authenticated Apps | Avoid leaking cached content between users. |
+| Internal Tools | Prioritize freshness over speed. |
+| Complex real-time systems | Integrate with sockets, streams, or live APIs. |
+## 🧠 Example Scenarios
+
+### Without cacheComponents (default)
+
+```typescript
+// dashboard/page.tsx
+export default async function Dashboard() {
+	const res = await fetch('/api/stats'); // might be cached
+	const data = await res.json();
+
+	return <div>Views: {data.views}</div>;
+}
+```
+
+✅ **Fast.**  
+❌ **Might show stale numbers.**
+
+### With cacheComponents: true
+
+```typescript
+// dashboard/page.tsx
+export default async function Dashboard() {
+	const res = await fetch('/api/stats'); // dynamic by default
+	const data = await res.json();
+
+	return <div>Views: {data.views}</div>;
+}
+```
+
+✅ **Always fresh.**  
+❌ **Slower unless wrapped with use cache.**
+
+### If you later decide part of your data should be cached:
+
+```typescript
+'use cache';
+
+export async function getStats() {
+	const res = await fetch('/api/stats');
+	return res.json();
+}
+```
+
+<Woz
+title='Scenario Analysis'
+description='Understanding the practical implications'
+prompt='Walk me through a real-world scenario where you would choose cacheComponents: true vs the default behavior. What would be your decision criteria?'
+/>
+
+## 🧬 How it interacts with ISR & PPR
+
+ISR (Incremental Static Regeneration) still works — you just need to reintroduce caching using `use cache` and `cacheLife`.
+
+PPR (Partial Prerendering) becomes dynamic by default — components will be rendered at runtime unless explicitly cached.
+
+So with cacheComponents, ISR and PPR are opt-in, not opt-out.
+
+## 🧩 Debugging & Observability
+
+To verify how components are being cached:
+
+- Run your app in development mode (`pnpm dev` or `npm run dev`).
+- Use the Next.js overlay → "Cache Info" tab (coming soon).
+- Log or inspect requests with `console.log('cache hit/miss')`.
+- Observe server logs for "rendered dynamically" messages.
+
+## 🗺️ Migration Guide
+
+If you're upgrading to Next.js 16:
+
+1. **Start by enabling `cacheComponents: true` in staging only.**
+2. **Identify where stale data matters** — those are safe to leave dynamic.
+3. **Gradually wrap stable data fetches in `use cache`.**
+4. **Define cache lifetimes using `cacheLife()`** (e.g., 60 seconds for analytics).
+5. **Add `cacheTag()` if you want fine-grained revalidation.**
+
+## 🧩 Summary Table
+
+| Feature | Default (before) | With cacheComponents |
+|---------|------------------|----------------------|
+| Data fetching | Static by default | Dynamic by default |
+| Caching | Implicit | Explicit |
+| Freshness | May be stale | Always fresh |
+| Performance | Faster | Depends on runtime load |
+| Use case | Static sites, blogs | Dynamic apps, dashboards |
+
+## 🧭 Quick Mental Model
+
+| You want | Use |
+|----------|-----|
+| Always live data | `cacheComponents: true` |
+| Cached data by default | Default (no flag) |
+| Mix of both | Enable cacheComponents and mark selected parts with `use cache` |
+
+## 🔮 The Future
+
+This flag is part of Next.js's long-term move toward unified runtime rendering — simplifying caching logic across the App Router.
+Eventually, it's likely that the behavior enabled by cacheComponents will become the default.
+
+## 📝 TL;DR
+
+| Concept | Summary |
+|---------|---------|
+| cacheComponents | Makes components dynamic by default |
+| `use cache` | Opt-in caching for selective parts |
+| Benefits | Fresh data, better control |
+| Risks | More runtime cost, slower responses |
+| Use when | Building dynamic, data-driven apps |
+
+<Woz
+title='Final Reflection'
+description='Putting it all together'
+prompt='Based on everything you learned about cacheComponents, how would you explain this to a colleague who is new to Next.js 16? What would be the key points you would emphasize?'
+/>

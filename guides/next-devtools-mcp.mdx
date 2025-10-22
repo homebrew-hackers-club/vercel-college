@@ -1,0 +1,272 @@
+---
+title: Next.js MCP Servers
+description: Learn how to integrate AI coding agents with your Next.js development workflow using 
+---
+
+# 🧠 Next.js MCP Servers — Developer Guide
+
+## 🔍 What are MCP Servers?
+
+Next.js MCP Servers enable AI coding agents to interact directly with your app's internals and developer environment through the Model Context Protocol (MCP).
+
+In simple terms:
+
+MCP enables AI coding assistants to access your Next.js app's runtime state, file structure, build errors, and server actions directly - turning vague prompts into precise, context-aware code generation and debugging.
+
+Think of it as giving your AI assistant the same real-time visibility into your app that you have as a developer.
+
+<Woz
+title='MCP Concept Check'
+description='Do you understand what MCP enables?'
+prompt='Explain in your own words how MCP changes the way AI assistants interact with Next.js applications.'
+/>
+
+## 🧠 What is the Model Context Protocol?
+
+MCP (Model Context Protocol) is an open standard that defines how AI agents and coding assistants can talk to applications in a structured way.
+
+Instead of "prompting" an AI assistant with vague text, MCP exposes tools and APIs that an AI can call directly to:
+
+- Inspect your project's structure
+- Read runtime state and logs
+- Fetch build errors or configuration
+- Generate or modify code with awareness of your app context
+
+Think of MCP as the bridge between your Next.js app and your AI agent.
+
+## 🧩 The Two Next.js MCP Servers
+
+Next.js offers two MCP servers that work together to provide both low-level project introspection and high-level developer guidance.
+
+| Server | Type | Purpose |
+|--------|------|---------|
+| Next.js MCP Server (built-in) | Internal | Gives the agent direct access to your app's internals (routes, components, errors, server actions) |
+| Next DevTools MCP (next-devtools-mcp) | External (NPM package) | Adds developer tools, codemods, best practices, and migration helpers for AI-driven workflows |
+
+You can (and should) run both simultaneously.
+
+## 🧱 1. Built-In Next.js MCP Server
+
+### 🔍 What it does
+
+When you run next dev on Next.js 16 or later, a built-in MCP server automatically starts inside your dev environment.
+
+It exposes runtime information about your app to any connected MCP-compatible agent.
+That includes:
+
+- **Real-time app state**: What's running in memory
+- **Routes and metadata**: Page routes, layouts, and component hierarchies
+- **Logs & errors**: Build, runtime, and hydration errors
+- **Server Actions**: Access and inspect server actions by ID
+
+### ⚙️ Configuration
+
+No setup needed! If you're running:
+
+```bash
+npm run dev
+```
+
+You already have it. The MCP endpoint runs inside your Next.js dev server, ready for any agent that connects.
+
+### 🧠 Key Tools Exposed
+
+| Tool | Description |
+|------|-------------|
+| `get_errors` | Returns all build/runtime/type errors in the dev server |
+| `get_logs` | Streams logs and console output |
+| `get_page_metadata` | Returns routes, component tree, and rendering info for a given page |
+| `get_project_metadata` | Returns your overall project configuration and structure |
+| `get_server_action_by_id` | Finds and inspects a specific Server Action by ID |
+
+### 🧩 Example Workflow
+
+**User**: "What errors are in my app right now?"  
+**→ Agent calls MCP tool**: `get_errors`  
+**→ Response**: Found hydration error on /about page  
+**→ Agent suggests fix and edits code**
+
+The agent can now read your live error state, understand the context, and generate real, targeted fixes — not guesses.
+
+<Woz
+title='Built-in MCP Server Check'
+description='Understanding the built-in server capabilities'
+prompt='What are the main tools exposed by the built-in Next.js MCP server and how could they help with debugging?'
+/>
+
+## 🧰 2. Next DevTools MCP (External Package)
+
+### 📦 Installation
+
+Add `next-devtools-mcp` to your project by defining it in `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "next-devtools": {
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@latest"]
+    }
+  }
+}
+```
+
+This tells your agent that `next-devtools-mcp` is available as an MCP server it can connect to.
+
+### 💡 What it adds
+
+`next-devtools-mcp` gives your agent higher-level powers:
+
+- Query Next.js documentation and best practices
+- Automate migration to Next.js 16 (codemods, route updates, etc.)
+- Provide guided setup for features like `cacheComponents` or PPR
+- Integrate with browser testing via Playwright MCP
+
+### 🧠 Example Capabilities
+
+| Task | Action |
+|------|--------|
+| "Help me migrate to Next.js 16" | Runs automated migration checks, applies codemods, and gives step-by-step upgrade guidance |
+| "Explain when to use `use client`" | Queries the Next.js knowledge base and responds with docs + context from your repo |
+| "Configure cacheComponents" | Analyzes your config and applies caching recommendations |
+
+<Woz
+title='DevTools MCP Check'
+description='Understanding the external package capabilities'
+prompt='How does the Next DevTools MCP package complement the built-in MCP server? Give an example of when you would use each.'
+/>
+## 🧬 3. How Agents Use MCP Servers
+
+When both servers are active, your coding agent (like ChatGPT, Claude, or Cursor AI) can:
+
+- Discover running MCP servers automatically
+- Connect to your Next.js dev server
+- Call available tools programmatically (`get_errors`, `get_logs`, etc.)
+- Cross-reference with Next DevTools MCP to provide advice, fixes, or explanations
+
+### Example Workflow
+
+**Agent**: "Let's debug your app."
+
+1. 🔍 Discovers local MCP servers
+2. 🔌 Connects to `nextjs_runtime`
+3. 🐛 Calls `get_errors`
+4. 📖 Reads error stack
+5. 📚 Queries docs from `next-devtools-mcp`
+6. 🔧 Suggests code fix + commits changes
+
+You just watch it fix your app intelligently — no manual prompting!
+
+<Woz
+title='Agent Workflow Check'
+description='Understanding how MCP servers work together'
+prompt='Walk through the steps an AI agent would take to debug a Next.js app using both MCP servers. What makes this different from traditional AI assistance?'
+/>
+
+## 🧭 4. Benefits for Developers
+
+| Feature | Description |
+|---------|-------------|
+| 🧩 Deep Context Awareness | Agents see your actual file tree, routes, and components |
+| 🪄 Live Diagnostics | Detect errors, logs, and misconfigurations in real time |
+| 🔄 Smart Upgrades | Automate migrations with codemods and upgrade guides |
+| 🧠 Better Code Generation | AI agents produce code aligned with your patterns and architecture |
+| 🧑‍💻 Streamlined Workflow | No need to copy-paste logs into chat — the agent reads them directly |
+## 🧪 5. Using MCP in Development
+
+### 🚀 Getting Started
+
+**Run your dev server:**
+```bash
+npm run dev
+```
+
+**Connect your coding agent:**
+
+Open your agent (e.g., ChatGPT with MCP support, Cursor, Claude Desktop) — it should auto-discover the running Next.js MCP server.
+
+### 💬 Query Examples
+
+Try asking your agent:
+
+- "What are the build errors right now?"
+- "List all routes and their components."
+- "What's the cache policy for my /dashboard page?"
+- "Migrate my project to Next.js 16."
+
+Behind the scenes, the agent uses the MCP protocol to call your Next.js tools directly.
+
+## 🧩 6. Debugging & Troubleshooting
+
+### 🔌 MCP Server Not Connecting?
+
+- Ensure you're on Next.js 16+
+- Restart your server: `npm run dev`
+- Check `.mcp.json` config paths
+- Restart your MCP client or coding agent
+
+### 🧱 Still Not Working?
+
+Run this to verify active servers:
+
+```bash
+npx next-devtools-mcp --list
+```
+
+You should see both:
+- ✅ `nextjs_runtime` (built-in)
+- ✅ `next-devtools-mcp` (external)
+
+## 🧭 7. Best Practices & Tips
+
+- ✅ Run both MCP servers — low-level + high-level complement each other
+- ✅ Use in dev only — MCP exposes internal APIs and should never be deployed in production
+- ✅ Keep `next-devtools-mcp` updated — it evolves alongside Next.js
+- ✅ Leverage Playwright MCP for E2E AI-assisted testing
+- ✅ Use descriptive commit messages — AI can reference git history when generating context-aware updates
+
+<Woz
+title='Setup Check'
+description='Ready to try MCP servers?'
+prompt='What are the key steps to set up MCP servers in your Next.js development environment? What would you do if the servers aren\'t connecting?'
+/>
+
+## 🧠 Quick Summary
+
+| Component | Description |
+|-----------|-------------|
+| Built-in MCP Server | Exposes your app's live runtime internals |
+| Next DevTools MCP | Provides Next.js knowledge, codemods, and best practices |
+| Together | Give your AI assistant the same context a human engineer would have when debugging or building |
+## 🚀 Example End-to-End Flow
+
+**Scenario**: You ask your agent — "Fix all hydration errors in my app."
+
+1. 🔍 Agent calls `discover_servers`
+2. 🔌 Connects to built-in `nextjs_runtime`
+3. 🐛 Executes `get_errors`
+4. 🔍 Detects hydration mismatch on `/about`
+5. 📚 Fetches remediation guidance from `next-devtools-mcp`
+6. 🔧 Edits component logic to fix render mismatch
+7. ▶️ Runs `npm run dev` again to verify
+8. ✅ Confirms "No runtime errors found ✅"
+
+All automated — zero manual debugging!
+
+<Woz
+title='End-to-End Understanding'
+description='Putting it all together'
+prompt='Explain how MCP servers transform the debugging workflow from traditional methods to AI-assisted development. What specific benefits would this provide to a development team?'
+/>
+
+## 🏁 Conclusion
+
+Next.js MCP servers mark the beginning of AI-native development. Instead of building apps for humans and debugging with tools, you now build alongside agents that see, understand, and interact with your live codebase.
+
+**In short:**
+
+- The built-in MCP server gives **visibility** into your running app
+- Next DevTools MCP gives **intelligence** to act on that visibility
+- Together, they turn your Next.js dev server into a real-time collaborative API for agents
+
+Ready to supercharge your Next.js development workflow? Start with `npm run dev` and connect your AI assistant! 🚀

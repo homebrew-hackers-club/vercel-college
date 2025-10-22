@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+Format this content in the md style. 
+Add emojis, ## titles and good spacing.
+Where you feel like its necessary use Woz component 
+It works like that 
+
+<Woz
+title='Recap'
+description='Make sure you really understand 🙃'
+prompt='Now use the Feynman method and ask me 3 questions one by one about this chapter content to make sure I really understand the material.'
+/>
+ 
+ title and description is optional. It sends a message inside "propmp" to our AI tutor Woz and he will based on that message anwser to the user. 
+ 
+ Put it in placeses of the content where it make sense to ask user questions to make sure he really understand. 
+
+ Also if in the content there are some new conspets you can use woz like that 
+
+<Woz
+prompt='Explain user how caching works and draw a diagrams using ascii art'
+/>
