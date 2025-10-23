@@ -4,8 +4,13 @@ globs:
 alwaysApply: false
 ---
 
+
+### formating 
 Format this content in the md style. 
 Add emojis, ## titles and good spacing.
+
+
+### adding woz 
 Where you feel like its necessary use Woz component 
 It works like that 
 
@@ -24,3 +29,12 @@ prompt='Now use the Feynman method and ask me 3 questions one by one about this 
 <Woz
 prompt='Explain user how caching works and draw a diagrams using ascii art'
 />
+
+
+### adding frontmatter 
+
+add frontmatter in the beginng of the content with super short and minimalistic title and description what content is about. Example :
+---
+title: What is LLM?
+description: Learn how llms work
+---
